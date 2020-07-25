@@ -1,0 +1,20 @@
+﻿<UserControl x:Class="Graphal.VisualDebug.Canvas.CanvasView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:design="clr-namespace:Graphal.VisualDebug.Design.ViewModels.Canvas;assembly=Graphal.VisualDebug.Design.ViewModels"
+             mc:Ignorable="d"
+             d:DesignHeight="100" d:DesignWidth="100" Background="Black"
+             Loaded="CanvasView_OnLoaded"
+             SizeChanged="CanvasView_OnSizeChanged"
+             MouseLeftButtonUp="CanvasView_OnMouseLeftButtonUp"
+             MouseRightButtonDown="CanvasView_OnMouseRightButtonDown"
+             MouseRightButtonUp="CanvasView_OnMouseRightButtonUp"
+             MouseMove="CanvasView_OnMouseMove">
+    <UserControl.DataContext>
+        <design:CanvasViewModelStub/>
+    </UserControl.DataContext>
+    <Image x:Name="Img" Stretch="None" Source="{Binding ImageSource}"
+           HorizontalAlignment="Left" VerticalAlignment="Top"/>
+</UserControl>

@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Graphal.VisualDebug.Abstractions\Graphal.VisualDebug.Abstractions.csproj" />
+      <ProjectReference Include="..\Graphal.VisualDebug.ViewModels\Graphal.VisualDebug.ViewModels.csproj" />
+    </ItemGroup>
+
+</Project>

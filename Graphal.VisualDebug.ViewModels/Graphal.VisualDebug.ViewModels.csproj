@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Graphal.Engine\Graphal.Engine.csproj" />
+      <ProjectReference Include="..\Graphal.Tools.Abstractions\Graphal.Tools.Abstractions.csproj" />
+      <ProjectReference Include="..\Graphal.Tools.Storage.Abstractions\Graphal.Tools.Storage.Abstractions.csproj" />
+      <ProjectReference Include="..\Graphal.VisualDebug.Abstractions\Graphal.VisualDebug.Abstractions.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions, Version=3.1.5.0, Culture=neutral, PublicKeyToken=adb9793829ddae60">
+        <HintPath>..\..\..\Users\crusader\.nuget\packages\microsoft.extensions.dependencyinjection.abstractions\3.1.5\lib\netstandard2.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="3.1.5" />
+    </ItemGroup>
+
+</Project>

@@ -1,0 +1,33 @@
+﻿<Window x:Class="Graphal.VisualDebug.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:loggingViews="clr-namespace:Graphal.VisualDebug.LogConsole"
+        xmlns:canvas="clr-namespace:Graphal.VisualDebug.Canvas"
+        xmlns:design="clr-namespace:Graphal.VisualDebug.Design.ViewModels.MainWindow;assembly=Graphal.VisualDebug.Design.ViewModels"
+        mc:Ignorable="d"
+        Title="{Binding WindowTitle}"
+        Left="{Binding PositionLeft, Mode=TwoWay}"
+        Top="{Binding PositionTop, Mode=TwoWay}"
+        Height="{Binding WindowHeight, Mode=TwoWay}"
+        Width="{Binding WindowWidth, Mode=TwoWay}"
+        Background="Black"
+        Closed="MainWindow_OnClosed">
+    <Window.DataContext>
+        <design:MainWindowViewModelStub/>
+    </Window.DataContext>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="100"/>
+        </Grid.RowDefinitions>
+        <canvas:CanvasView x:Name="CanvasView" Grid.Row="0"
+                           VerticalAlignment="Stretch" HorizontalAlignment="Stretch" 
+                           DataContext="{Binding Canvas}"/>
+        <GridSplitter Grid.Row="1" Background="DarkSlateGray" Height="5" ShowsPreview="False"
+                      VerticalAlignment="Center" HorizontalAlignment="Stretch" />
+        <loggingViews:LogConsoleView Grid.Row="2" DataContext="{Binding LogConsole}"/>
+    </Grid>
+</Window>
