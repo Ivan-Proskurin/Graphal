@@ -1,6 +1,7 @@
 ﻿using System.Drawing;
 
 using Graphal.Engine.Abstractions.TwoD.Rendering;
+using Graphal.Engine.Persistence.TwoD.Primitives;
 using Graphal.Engine.TwoD.Geometry;
 using Graphal.Engine.TwoD.Transforms;
 
@@ -42,6 +43,16 @@ namespace Graphal.Engine.TwoD.Primitives
         public override void Render(ICanvas canvas)
         {
             canvas.Set(Vector.X, Vector.Y, Color);
+        }
+
+        public override Primitive2Ds ToPrimitive2Ds()
+        {
+            return new Point2Ds
+            {
+                X = _originalVector.X,
+                Y = _originalVector.Y,
+                Color = Color.ToArgb(),
+            };
         }
     }
 }

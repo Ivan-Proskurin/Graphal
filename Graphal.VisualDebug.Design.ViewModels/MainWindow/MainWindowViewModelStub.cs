@@ -35,12 +35,7 @@ namespace Graphal.VisualDebug.Design.ViewModels.MainWindow
             throw new System.NotImplementedException();
         }
 
-        public Task RestoreAppearanceAsync()
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public Task SaveAppearanceAsync()
+        public Task CloseAsync()
         {
             throw new System.NotImplementedException();
         }

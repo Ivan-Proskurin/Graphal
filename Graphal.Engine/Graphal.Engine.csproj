@@ -9,10 +9,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Abstractions" />
-    </ItemGroup>
-
-    <ItemGroup>
       <Compile Remove="Graphal.Engine.Tests\**" />
     </ItemGroup>
 

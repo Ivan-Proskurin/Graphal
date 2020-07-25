@@ -1,4 +1,5 @@
-﻿using Graphal.Engine.TwoD.Geometry;
+﻿using Graphal.Engine.Persistence.TwoD;
+using Graphal.Engine.TwoD.Geometry;
 using Graphal.Engine.TwoD.Primitives;
 
 namespace Graphal.Engine.Abstractions.TwoD.Rendering
@@ -16,5 +17,9 @@ namespace Graphal.Engine.Abstractions.TwoD.Rendering
         void EndShift(int x, int y);
 
         Vector2D ToWorldCoordinates(Vector2D v);
+
+        Scene2Ds ToScene2Ds();
+
+        void FromScene2Ds(Scene2Ds container);
     }
 }

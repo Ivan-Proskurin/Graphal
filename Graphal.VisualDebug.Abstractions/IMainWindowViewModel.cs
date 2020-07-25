@@ -23,8 +23,6 @@ namespace Graphal.VisualDebug.Abstractions
 
         Task InitializeAsync();
 
-        Task RestoreAppearanceAsync();
-
-        Task SaveAppearanceAsync();
+        Task CloseAsync();
     }
 }

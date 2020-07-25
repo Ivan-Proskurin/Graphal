@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 using Graphal.Engine.Abstractions.TwoD.Rendering;
+using Graphal.Engine.Persistence.TwoD;
 using Graphal.Engine.TwoD.Geometry;
 using Graphal.Engine.TwoD.Primitives;
 using Graphal.Engine.TwoD.Transforms;
@@ -10,9 +12,9 @@ namespace Graphal.Engine.TwoD.Rendering
     public class Scene2D : IScene2D
     {
         private readonly ICanvas _canvas;
-        private readonly List<Primitive2D> _primitives = new List<Primitive2D>();
+        private List<Primitive2D> _primitives = new List<Primitive2D>();
 
-        private readonly ShiftTransform2D _shift = new ShiftTransform2D(0, 0);
+        private ShiftTransform2D _shift = new ShiftTransform2D(0, 0);
         private Vector2D? _shiftStart;
 
         public Scene2D(ICanvas canvas)
@@ -68,10 +70,7 @@ namespace Graphal.Engine.TwoD.Rendering
             }
 
             transform.Combine(_shift);
-            foreach (var primitive in _primitives)
-            {
-                primitive.Transform(transform);
-            }
+            ApplyTransform(transform);
 
             Render();
         }
@@ -92,6 +91,34 @@ namespace Graphal.Engine.TwoD.Rendering
         public Vector2D ToWorldCoordinates(Vector2D v)
         {
             return _shift.Invert(v);
+        }
+
+        public Scene2Ds ToScene2Ds()
+        {
+            return new Scene2Ds
+            {
+                Transform = _shift.ToTransform2Ds(),
+                Primitives = _primitives.Select(x => x.ToPrimitive2Ds()).ToList(),
+            };
+        }
+
+        public void FromScene2Ds(Scene2Ds container)
+        {
+            if (container.Transform.ToTransform2D() is ShiftTransform2D shiftTransform)
+            {
+                _shift = shiftTransform;
+            }
+
+            _primitives = container.Primitives.Select(x => x.ToPrimitive2D()).ToList();
+            ApplyTransform(_shift);
+        }
+
+        private void ApplyTransform(Transform2D transform)
+        {
+            foreach (var primitive in _primitives)
+            {
+                primitive.Transform(transform);
+            }
         }
 
         private ShiftTransform2D GetShiftTransform(int x, int y)

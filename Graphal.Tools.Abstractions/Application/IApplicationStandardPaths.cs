@@ -3,5 +3,7 @@
     public interface IApplicationStandardPaths
     {
         string UserApplicationSettings { get; }
+
+        string UserLocalStorage { get; }
     }
 }

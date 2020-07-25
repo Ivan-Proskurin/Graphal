@@ -17,7 +17,7 @@ namespace Graphal.VisualDebug
         {
             if (DataContext is IMainWindowViewModel viewModel)
             {
-                await viewModel.SaveAppearanceAsync();
+                await viewModel.CloseAsync();
             }
         }
     }

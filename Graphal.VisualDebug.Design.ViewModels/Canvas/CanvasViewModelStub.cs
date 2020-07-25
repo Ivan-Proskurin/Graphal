@@ -1,4 +1,6 @@
-﻿using Graphal.VisualDebug.Abstractions.Canvas;
+﻿using System.Threading.Tasks;
+
+using Graphal.VisualDebug.Abstractions.Canvas;
 
 namespace Graphal.VisualDebug.Design.ViewModels.Canvas
 {
@@ -6,7 +8,12 @@ namespace Graphal.VisualDebug.Design.ViewModels.Canvas
     {
         public object ImageSource => null;
 
-        public void Initialize()
+        public Task InitializeAsync()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Task StoreSceneAsync()
         {
             throw new System.NotImplementedException();
         }

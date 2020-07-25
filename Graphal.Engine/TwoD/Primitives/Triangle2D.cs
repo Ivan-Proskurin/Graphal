@@ -1,6 +1,7 @@
 ﻿using System.Drawing;
 
 using Graphal.Engine.Abstractions.TwoD.Rendering;
+using Graphal.Engine.Persistence.TwoD.Primitives;
 using Graphal.Engine.TwoD.Geometry;
 using Graphal.Engine.TwoD.Transforms;
 
@@ -11,7 +12,7 @@ namespace Graphal.Engine.TwoD.Primitives
         private readonly Vector2D _origV1;
         private readonly Vector2D _origV2;
         private readonly Vector2D _origV3;
-        private readonly Color _color;
+        private Color _color;
 
         private Vector2D _v1;
         private Vector2D _v2;
@@ -62,6 +63,17 @@ namespace Graphal.Engine.TwoD.Primitives
                     }
                 }
             }
+        }
+
+        public override Primitive2Ds ToPrimitive2Ds()
+        {
+            return new Triangle2Ds
+            {
+                V1 = _origV1.ToVector2Ds(),
+                V2 = _origV2.ToVector2Ds(),
+                V3 = _origV3.ToVector2Ds(),
+                Color = _color.ToArgb(),
+            };
         }
 
         private void UpdateGeometry()

@@ -16,9 +16,12 @@ namespace Graphal.VisualDebug.Canvas
             RenderOptions.SetEdgeMode(Img, EdgeMode.Aliased);
         }
 
-        private void CanvasView_OnLoaded(object sender, RoutedEventArgs e)
+        private async void CanvasView_OnLoaded(object sender, RoutedEventArgs e)
         {
-            ViewModel?.Initialize();
+            if (ViewModel != null)
+            {
+                await ViewModel.InitializeAsync();
+            }
         }
 
         private void CanvasView_OnMouseLeftButtonUp(object sender, MouseButtonEventArgs e)

@@ -1,10 +1,14 @@
-﻿namespace Graphal.VisualDebug.Abstractions.Canvas
+﻿using System.Threading.Tasks;
+
+namespace Graphal.VisualDebug.Abstractions.Canvas
 {
     public interface ICanvasViewModel
     {
         object ImageSource { get; }
 
-        void Initialize();
+        Task InitializeAsync();
+
+        Task StoreSceneAsync();
 
         void SetPoint(int x, int y);
 

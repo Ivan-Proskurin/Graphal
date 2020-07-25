@@ -63,7 +63,13 @@ namespace Graphal.VisualDebug.ViewModels
             }
         }
 
-        public async Task RestoreAppearanceAsync()
+        public async Task CloseAsync()
+        {
+            await Canvas.StoreSceneAsync();
+            await SaveAppearanceAsync();
+        }
+
+        private async Task RestoreAppearanceAsync()
         {
             var appearance = await _windowAppearanceService.LoadAsync(ViewModelName) ?? _defaultWindowAppearance;
             WindowWidth = appearance.Width;
@@ -72,7 +78,7 @@ namespace Graphal.VisualDebug.ViewModels
             PositionTop = appearance.Top;
         }
 
-        public Task SaveAppearanceAsync()
+        private Task SaveAppearanceAsync()
         {
             return _windowAppearanceService.SaveAsync(ViewModelName, new WindowAppearance
             {

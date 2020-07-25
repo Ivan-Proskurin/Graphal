@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Threading.Tasks;
 
-using Graphal.Engine.Abstractions.Logging;
 using Graphal.Engine.Abstractions.Profile;
 using Graphal.Engine.Abstractions.TwoD.Rendering;
 using Graphal.Engine.TwoD.Geometry;
 using Graphal.Engine.TwoD.Primitives;
+using Graphal.Tools.Abstractions.Persistence;
 using Graphal.VisualDebug.Abstractions.Canvas;
 
 namespace Graphal.VisualDebug.ViewModels.Canvas
@@ -22,7 +23,7 @@ namespace Graphal.VisualDebug.ViewModels.Canvas
             Color.DarkOrchid,
         };
         
-        private readonly ILogger _logger;
+        private readonly IScenePersistenceService _scenePersistenceService;
         private readonly IPerformanceProfiler _performanceProfiler;
         private readonly IScene2D _scene;
         private readonly IBitmapCanvas _canvas;
@@ -32,12 +33,12 @@ namespace Graphal.VisualDebug.ViewModels.Canvas
         private Stopwatch _stopwatch;
 
         public CanvasViewModel(
-            ILogger logger,
+            IScenePersistenceService scenePersistenceService,
             IPerformanceProfiler performanceProfiler,
             IScene2D scene,
             IBitmapCanvas canvas)
         {
-            _logger = logger;
+            _scenePersistenceService = scenePersistenceService;
             _performanceProfiler = performanceProfiler;
             _scene = scene;
             _canvas = canvas;
@@ -45,17 +46,35 @@ namespace Graphal.VisualDebug.ViewModels.Canvas
 
         public object ImageSource => _canvas.Bitmap;
 
-        public void Initialize()
+        public async Task InitializeAsync()
         {
-            var triangle = new Triangle2D(
-                new Vector2D(-50, -50),
-                new Vector2D(0, 50),
-                new Vector2D(50, -50),
-                GetNextColor());
+            using (var session = _performanceProfiler.CreateSession())
+            {
+                var sceneContainer = await _scenePersistenceService.LoadScene2DAsync();
+                if (sceneContainer == null)
+                {
+                    var triangle = new Triangle2D(
+                        new Vector2D(-50, -50),
+                        new Vector2D(0, 50),
+                        new Vector2D(50, -50),
+                        GetNextColor());
+                    
+                    _scene.Append(triangle);
+                    _scene.BeginShift(0, 0);
+                    _scene.EndShift(_canvas.Width / 2, _canvas.Height / 2);
+                    return;
+                }
 
-            _scene.Append(triangle);
-            _scene.BeginShift(0, 0);
-            _scene.EndShift(_canvas.Width / 2, _canvas.Height / 2);
+                _scene.FromScene2Ds(sceneContainer);
+                _scene.Render();
+                session.LogWithPerformance("2D scene loaded");
+            }
+        }
+
+        public Task StoreSceneAsync()
+        {
+            var sceneContainer = _scene.ToScene2Ds();
+            return _scenePersistenceService.SaveScene2DAsync(sceneContainer);
         }
 
         public void SetPoint(int x, int y)

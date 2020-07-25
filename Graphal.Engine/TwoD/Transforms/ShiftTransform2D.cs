@@ -1,4 +1,5 @@
-﻿using Graphal.Engine.TwoD.Geometry;
+﻿using Graphal.Engine.Persistence.TwoD.Transforms;
+using Graphal.Engine.TwoD.Geometry;
 
 namespace Graphal.Engine.TwoD.Transforms
 {
@@ -27,6 +28,15 @@ namespace Graphal.Engine.TwoD.Transforms
             {
                 Offset += shiftTransform.Offset;
             }
+        }
+
+        public override Transform2Ds ToTransform2Ds()
+        {
+            return new ShiftTransform2Ds
+            {
+                OffsetX = Offset.X,
+                OffsetY = Offset.Y,
+            };
         }
     }
 }
