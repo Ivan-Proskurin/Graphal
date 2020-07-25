@@ -21,9 +21,6 @@ namespace Graphal.Engine.TwoD.Primitives
         private Line2D _line1;
         private Line2D _line2;
         private Line2D _line3;
-        private int _test1;
-        private int _test2;
-        private int _test3;
         private EmbracingRect _rect;
 
         public Triangle2D(Vector2D v1, Vector2D v2, Vector2D v3, Color color)
@@ -53,18 +50,65 @@ namespace Graphal.Engine.TwoD.Primitives
 
         public override void Render(ICanvas canvas)
         {
-            for (var y = _rect.Top; y <= _rect.Bottom; y++)
+            if (_v2.X < _v3.X)
             {
-                for (var x = _rect.Left; x <= _rect.Right; x++)
+                RenderBetween(_v1.Y, _v2.Y, _line1, _line3, canvas);
+                RenderBetween(_v2.Y, _v3.Y, _line2, _line3, canvas);
+            }
+            else
+            {
+                RenderBetween(_v1.Y, _v2.Y, _line3, _line1, canvas);
+                RenderBetween(_v2.Y, _v3.Y, _line3, _line2, canvas);
+            }
+        }
+
+        private void RenderBetween(int y1, int y2, Line2D line1, Line2D line2, ICanvas canvas)
+        {
+            if (line1.IsHorizontal())
+            {
+                RenderStroke(line1.X1, line1.X2, line1.Y1, canvas);
+                return;
+            }
+
+            if (line2.IsHorizontal())
+            {
+                RenderStroke(line2.X1, line2.X2, line2.Y1, canvas);
+                return;
+            }
+
+            for (var y = y1; y <= y2; y++)
+            {
+                var x1 = line1.IntersectYToLeft(y);
+                if (x1 < _rect.Left)
                 {
-                    if (_line1.Test(x, y, _test1) && _line2.Test(x, y, _test2) && _line3.Test(x, y, _test3))
-                    {
-                        canvas.Set(x, y, _color);
-                    }
+                    x1 = _rect.Left;
+                }
+
+                var x2 = line2.IntersectYToRight(y);
+                if (x2 > _rect.Right)
+                {
+                    x2 = _rect.Right;
+                }
+
+                if (x1 == x2)
+                {
+                    canvas.Set(x1, y, _color);
+                }
+                else
+                {
+                    RenderStroke(x1, x2, y, canvas);
                 }
             }
         }
 
+        private void RenderStroke(int x1, int x2, int y, ICanvas canvas)
+        {
+            for (var x = x1; x <= x2; x++)
+            {
+                canvas.Set(x, y, _color);
+            }
+        }
+        
         public override Primitive2Ds ToPrimitive2Ds()
         {
             return new Triangle2Ds
@@ -78,12 +122,10 @@ namespace Graphal.Engine.TwoD.Primitives
 
         private void UpdateGeometry()
         {
+            Vector2D.SortByY(ref _v1, ref _v2, ref _v3);
             _line1 = new Line2D(_v1, _v2);
             _line2 = new Line2D(_v2, _v3);
             _line3 = new Line2D(_v1, _v3);
-            _test1 = _line1.Substitute(_v3.X, _v3.Y);
-            _test2 = _line2.Substitute(_v1.X, _v1.Y);
-            _test3 = _line3.Substitute(_v2.X, _v2.Y);
             _rect = EmbracingRect.Empty;
             _rect.ExtendBy(_v1.X, _v1.Y);
             _rect.ExtendBy(_v2.X, _v2.Y);
