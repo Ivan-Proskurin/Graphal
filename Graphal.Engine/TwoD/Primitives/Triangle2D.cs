@@ -48,7 +48,7 @@ namespace Graphal.Engine.TwoD.Primitives
             UpdateGeometry();
         }
 
-        public override void Render(ICanvas canvas)
+        public override void Render(ICanvas2D canvas)
         {
             if (_v2.X < _v3.X)
             {
@@ -62,7 +62,7 @@ namespace Graphal.Engine.TwoD.Primitives
             }
         }
 
-        private void RenderBetween(int y1, int y2, Line2D line1, Line2D line2, ICanvas canvas)
+        private void RenderBetween(int y1, int y2, Line2D line1, Line2D line2, ICanvas2D canvas)
         {
             if (line1.IsHorizontal())
             {
@@ -101,7 +101,7 @@ namespace Graphal.Engine.TwoD.Primitives
             }
         }
 
-        private void RenderStroke(int x1, int x2, int y, ICanvas canvas)
+        private void RenderStroke(int x1, int x2, int y, ICanvas2D canvas)
         {
             for (var x = x1; x <= x2; x++)
             {

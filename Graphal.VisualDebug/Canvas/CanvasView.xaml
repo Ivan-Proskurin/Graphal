@@ -9,6 +9,7 @@
              Loaded="CanvasView_OnLoaded"
              SizeChanged="CanvasView_OnSizeChanged"
              MouseLeftButtonUp="CanvasView_OnMouseLeftButtonUp"
+             MouseLeftButtonDown="CanvasView_OnMouseLeftButtonDown"
              MouseRightButtonDown="CanvasView_OnMouseRightButtonDown"
              MouseRightButtonUp="CanvasView_OnMouseRightButtonUp"
              MouseMove="CanvasView_OnMouseMove">

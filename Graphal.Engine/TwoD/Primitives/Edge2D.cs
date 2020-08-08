@@ -38,7 +38,7 @@ namespace Graphal.Engine.TwoD.Primitives
             throw new System.NotImplementedException();
         }
 
-        public override void Render(ICanvas canvas)
+        public override void Render(ICanvas2D canvas)
         {
             for (var y = _rect.Top; y <= _rect.Bottom; y++)
             {

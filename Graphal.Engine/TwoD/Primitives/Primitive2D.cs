@@ -10,7 +10,7 @@ namespace Graphal.Engine.TwoD.Primitives
 
         public abstract void Transform(Transform2D transform);
 
-        public abstract void Render(ICanvas canvas);
+        public abstract void Render(ICanvas2D canvas);
 
         public abstract Primitive2Ds ToPrimitive2Ds();
     }

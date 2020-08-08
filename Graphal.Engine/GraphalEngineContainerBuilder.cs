@@ -18,7 +18,8 @@ namespace Graphal.Engine
         {
             return services
                 .AddTransient<IRenderingMap, RenderingMap>()
-                .AddTransient<IScene2D, Scene2D>();
+                .AddSingleton<ICanvas2D, Canvas2D>()
+                .AddSingleton<IScene2D, Scene2D>();
         }
     }
 }

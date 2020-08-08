@@ -1,6 +1,5 @@
 ﻿using System.Windows;
 using Graphal.VisualDebug.Abstractions;
-using Graphal.VisualDebug.Rendering;
 
 using Microsoft.Extensions.DependencyInjection;
 
@@ -15,7 +14,6 @@ namespace Graphal.VisualDebug
         {
             base.OnStartup(e);
             var mainViewModel = new ServiceCollection()
-                .AddSingleton<IViewLocator>(new ViewLocator(this))
                 .BuildVisualDebugContainer()
                 .BuildServiceProvider()
                 .GetRequiredService<IMainWindowViewModel>();

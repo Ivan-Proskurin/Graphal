@@ -40,7 +40,7 @@ namespace Graphal.Engine.TwoD.Primitives
             Vector = transform.Apply(_originalVector);
         }
 
-        public override void Render(ICanvas canvas)
+        public override void Render(ICanvas2D canvas)
         {
             canvas.Set(Vector.X, Vector.Y, Color);
         }

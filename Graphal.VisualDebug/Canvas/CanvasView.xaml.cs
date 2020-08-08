@@ -24,10 +24,27 @@ namespace Graphal.VisualDebug.Canvas
             }
         }
 
-        private void CanvasView_OnMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        private async void CanvasView_OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
+            if (ViewModel == null) return;
             var clickPoint = e.GetPosition(this);
-            ViewModel?.SetPoint((int)clickPoint.X, (int)clickPoint.Y);
+            await ViewModel.BeginShiftAsync((int)clickPoint.X, (int)clickPoint.Y);
+        }
+
+        private async void CanvasView_OnMouseMove(object sender, MouseEventArgs e)
+        {
+            if (ViewModel == null || e.LeftButton != MouseButtonState.Pressed) return;
+            var clickPoint = e.GetPosition(this);
+            await ViewModel.ShiftAsync((int)clickPoint.X, (int)clickPoint.Y);
+        }
+
+        private async void CanvasView_OnMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            // var clickPoint = e.GetPosition(this);
+            // ViewModel?.SetPoint((int)clickPoint.X, (int)clickPoint.Y);
+            if (ViewModel == null) return;
+            var clickPoint = e.GetPosition(this);
+            await ViewModel.EndShiftAsync((int)clickPoint.X, (int)clickPoint.Y);
         }
 
         private void CanvasView_OnSizeChanged(object sender, SizeChangedEventArgs e)
@@ -37,23 +54,16 @@ namespace Graphal.VisualDebug.Canvas
 
         private void CanvasView_OnMouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
+            if (ViewModel == null) return;
             var clickPoint = e.GetPosition(this);
-            ViewModel?.BeginShift((int)clickPoint.X, (int)clickPoint.Y);
+            // ViewModel.BeginShift((int)clickPoint.X, (int)clickPoint.Y);
         }
 
         private void CanvasView_OnMouseRightButtonUp(object sender, MouseButtonEventArgs e)
         {
+            if (ViewModel == null) return;
             var clickPoint = e.GetPosition(this);
-            ViewModel?.EndShift((int)clickPoint.X, (int)clickPoint.Y);
-        }
-
-        private void CanvasView_OnMouseMove(object sender, MouseEventArgs e)
-        {
-            if (e.RightButton == MouseButtonState.Pressed)
-            {
-                var clickPoint = e.GetPosition(this);
-                ViewModel?.Shift((int)clickPoint.X, (int)clickPoint.Y);
-            }
+            // ViewModel.EndShift((int)clickPoint.X, (int)clickPoint.Y);
         }
 
         private ICanvasViewModel ViewModel => this.GetViewModel<ICanvasViewModel>();

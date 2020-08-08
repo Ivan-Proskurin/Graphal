@@ -33,12 +33,32 @@ namespace Graphal.VisualDebug.Design.ViewModels.Canvas
             throw new System.NotImplementedException();
         }
 
+        public Task BeginShiftAsync(int x, int y)
+        {
+            throw new System.NotImplementedException();
+        }
+
         public void Shift(int x, int y)
         {
             throw new System.NotImplementedException();
         }
 
+        public Task ShiftAsync(int x, int y)
+        {
+            throw new System.NotImplementedException();
+        }
+
         public void EndShift(int x, int y)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Task EndShiftAsync(int x, int y)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void LogMessage(string message)
         {
             throw new System.NotImplementedException();
         }

@@ -4,7 +4,7 @@ using Graphal.Engine.Abstractions.TwoD.Rendering;
 
 namespace Graphal.Engine.Tests.Mocks
 {
-    public class CanvasMock : ICanvas
+    public class CanvasMock : ICanvas2D
     {
         private Color[,] _canvas;
         

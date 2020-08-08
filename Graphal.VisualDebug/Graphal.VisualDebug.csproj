@@ -67,11 +67,10 @@
         <Compile Include="LogConsole\LogConsoleView.xaml.cs">
           <DependentUpon>LogConsoleView.xaml</DependentUpon>
         </Compile>
-        <Compile Include="Rendering\BitmapCanvas.cs" />
-        <Compile Include="Rendering\IViewLocator.cs" />
+        <Compile Include="Rendering\BitmapOutputDevice.cs" />
         <Compile Include="Rendering\RenderingSettingsProvider.cs" />
-        <Compile Include="Rendering\ViewLocator.cs" />
         <Compile Include="VisualDebugContainerBuilder.cs" />
+        <Compile Include="Wrappers\DispatcherWrapper.cs" />
         <Page Include="Canvas\CanvasView.xaml" />
         <Page Include="LogConsole\LogConsoleView.xaml" />
         <Page Include="MainWindow.xaml">

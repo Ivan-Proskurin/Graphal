@@ -1,14 +1,15 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.Threading.Tasks;
 
+using Graphal.Engine.Abstractions.Logging;
 using Graphal.Engine.Abstractions.Profile;
 using Graphal.Engine.Abstractions.TwoD.Rendering;
 using Graphal.Engine.TwoD.Geometry;
 using Graphal.Engine.TwoD.Primitives;
 using Graphal.Tools.Abstractions.Persistence;
 using Graphal.VisualDebug.Abstractions.Canvas;
+using Graphal.VisualDebug.Abstractions.Wrappers;
 
 namespace Graphal.VisualDebug.ViewModels.Canvas
 {
@@ -22,34 +23,42 @@ namespace Graphal.VisualDebug.ViewModels.Canvas
             Color.Brown,
             Color.DarkOrchid,
         };
-        
+
+        private readonly ILogger _logger;
         private readonly IScenePersistenceService _scenePersistenceService;
         private readonly IPerformanceProfiler _performanceProfiler;
         private readonly IScene2D _scene;
-        private readonly IBitmapCanvas _canvas;
+        private readonly IBitmapSource _bitmapSource;
+        private readonly IDispatcherWrapper _dispatcherWrapper;
         private readonly List<Vector2D> _vectors = new List<Vector2D>();
-        private int _framesCounter;
         private int _colorIndex;
-        private Stopwatch _stopwatch;
+
+        private int _width;
+        private int _height;
 
         public CanvasViewModel(
+            ILogger logger,
             IScenePersistenceService scenePersistenceService,
             IPerformanceProfiler performanceProfiler,
             IScene2D scene,
-            IBitmapCanvas canvas)
+            IBitmapSource bitmapSource,
+            IDispatcherWrapper dispatcherWrapper)
         {
+            _logger = logger;
             _scenePersistenceService = scenePersistenceService;
             _performanceProfiler = performanceProfiler;
             _scene = scene;
-            _canvas = canvas;
+            _bitmapSource = bitmapSource;
+            _dispatcherWrapper = dispatcherWrapper;
         }
 
-        public object ImageSource => _canvas.Bitmap;
+        public object ImageSource => _bitmapSource.Bitmap;
 
         public async Task InitializeAsync()
         {
             using (var session = _performanceProfiler.CreateSession())
             {
+                _scene.FpsChanged += SceneOnFpsChanged;
                 var sceneContainer = await _scenePersistenceService.LoadScene2DAsync();
                 if (sceneContainer == null)
                 {
@@ -60,13 +69,13 @@ namespace Graphal.VisualDebug.ViewModels.Canvas
                         GetNextColor());
                     
                     _scene.Append(triangle);
-                    _scene.BeginShift(0, 0);
-                    _scene.EndShift(_canvas.Width / 2, _canvas.Height / 2);
+                    await _scene.BeginShiftAsync(0, 0);
+                    await _scene.EndShiftAsync(_width / 2, _height / 2);
                     return;
                 }
 
                 _scene.FromScene2Ds(sceneContainer);
-                _scene.Render();
+                await _scene.RenderAsync();
                 session.LogWithPerformance("2D scene loaded");
             }
         }
@@ -114,31 +123,23 @@ namespace Graphal.VisualDebug.ViewModels.Canvas
 
         public void Resize(int width, int height)
         {
-            _canvas.SetSize(width, height);
+            _width = width;
+            _height = height;
         }
 
-        public void BeginShift(int x, int y)
+        public Task BeginShiftAsync(int x, int y)
         {
-            _scene.BeginShift(x, y);
-            _framesCounter = 0;
-            _stopwatch = Stopwatch.StartNew();
+            return _scene.BeginShiftAsync(x, y);
         }
 
-        public void Shift(int x, int y)
+        public Task ShiftAsync(int x, int y)
         {
-            _scene.Shift(x, y);
-            _framesCounter++;
+            return _scene.ShiftAsync(x, y);
         }
 
-        public void EndShift(int x, int y)
+        public Task EndShiftAsync(int x, int y)
         {
-            using (var session = _performanceProfiler.CreateSession())
-            {
-                _scene.EndShift(x, y);
-                _stopwatch.Stop();
-                session.LogWithPerformance($"FPS = {_framesCounter * 1000 / _stopwatch.ElapsedMilliseconds}");
-                _framesCounter = 0;
-            }
+            return _scene.EndShiftAsync(x, y);
         }
 
         private Color GetNextColor()
@@ -150,6 +151,11 @@ namespace Graphal.VisualDebug.ViewModels.Canvas
             }
 
             return color;
+        }
+
+        private void SceneOnFpsChanged(IScene2D sender, FpsChangedArgs e)
+        {
+            _dispatcherWrapper.Invoke(() => _logger.Info($"FPS: {e.Fps}"));
         }
     }
 }

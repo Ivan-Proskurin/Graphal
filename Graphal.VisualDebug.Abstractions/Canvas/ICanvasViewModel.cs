@@ -14,10 +14,10 @@ namespace Graphal.VisualDebug.Abstractions.Canvas
 
         void Resize(int width, int height);
 
-        void BeginShift(int x, int y);
+        Task BeginShiftAsync(int x, int y);
 
-        void Shift(int x, int y);
+        Task ShiftAsync(int x, int y);
 
-        void EndShift(int x, int y);
+        Task EndShiftAsync(int x, int y);
     }
 }
