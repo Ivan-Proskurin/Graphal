@@ -147,8 +147,8 @@ namespace Graphal.Engine.TwoD.Rendering
             {
                 while (!_cancellationTokenSource.IsCancellationRequested)
                 {
-                    var dequeued = _transformsQueue.TryDequeue(out var transform);
-                    if (!dequeued)
+                    var transform = DequeueLastTransform();
+                    if (transform == null)
                     {
                         continue;
                     }
@@ -164,6 +164,17 @@ namespace Graphal.Engine.TwoD.Rendering
                 var fps = (int)(framesCount * 1000 / stopwatch.ElapsedMilliseconds);
                 OnFpsChanged(new FpsChangedArgs(fps));
             }
+        }
+
+        private ShiftTransform2D DequeueLastTransform()
+        {
+            ShiftTransform2D result = null;
+            while (_transformsQueue.TryDequeue(out var transform))
+            {
+                result = transform;
+            }
+
+            return result;
         }
     }
 }
