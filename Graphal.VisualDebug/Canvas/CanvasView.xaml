@@ -14,7 +14,7 @@
              MouseRightButtonUp="CanvasView_OnMouseRightButtonUp"
              MouseMove="CanvasView_OnMouseMove">
     <UserControl.DataContext>
-        <design:CanvasViewModelStub/>
+        <design:CanvasViewModel3dStub/>
     </UserControl.DataContext>
     <Image x:Name="Img" Stretch="None" Source="{Binding ImageSource}"
            HorizontalAlignment="Left" VerticalAlignment="Top"/>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using Graphal.Engine.Persistence.TwoD;
@@ -11,6 +12,8 @@ namespace Graphal.Engine.Abstractions.TwoD.Rendering
     public interface IScene2D
     {
         void Append(Primitive2D primitive);
+
+        void SetShift(Vector2D shift);
 
         Task RenderAsync();
 
@@ -25,6 +28,8 @@ namespace Graphal.Engine.Abstractions.TwoD.Rendering
         Scene2Ds ToScene2Ds();
 
         void FromScene2Ds(Scene2Ds container);
+
+        void FromProjection(IEnumerable<Triangle2D> triangles);
         
         event FpsChangedEventHandler FpsChanged;
     }
@@ -38,5 +43,5 @@ namespace Graphal.Engine.Abstractions.TwoD.Rendering
         public int Fps { get; }
     }
     
-    public delegate void FpsChangedEventHandler(IScene2D sender, FpsChangedArgs e);
+    public delegate void FpsChangedEventHandler(object sender, FpsChangedArgs e);
 }

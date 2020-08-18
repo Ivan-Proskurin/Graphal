@@ -153,7 +153,7 @@ namespace Graphal.VisualDebug.ViewModels.Canvas
             return color;
         }
 
-        private void SceneOnFpsChanged(IScene2D sender, FpsChangedArgs e)
+        private void SceneOnFpsChanged(object sender, FpsChangedArgs e)
         {
             _dispatcherWrapper.Invoke(() => _logger.Info($"FPS: {e.Fps}"));
         }

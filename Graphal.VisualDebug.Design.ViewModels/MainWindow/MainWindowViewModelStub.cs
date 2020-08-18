@@ -14,6 +14,7 @@ namespace Graphal.VisualDebug.Design.ViewModels.MainWindow
         {
             LogConsole = new LogConsoleViewModelStub();
             Canvas = new CanvasViewModelStub();
+            Canvas3d = new CanvasViewModel3dStub();
         }
 
         public string WindowTitle { get; set; } = "Graphal Visual Debug Tool Stub";
@@ -29,6 +30,8 @@ namespace Graphal.VisualDebug.Design.ViewModels.MainWindow
         public ILogConsoleViewModel LogConsole { get; }
 
         public ICanvasViewModel Canvas { get; }
+
+        public ICanvasViewModel3d Canvas3d { get; }
 
         public Task InitializeAsync()
         {

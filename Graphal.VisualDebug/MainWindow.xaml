@@ -13,7 +13,9 @@
         Height="{Binding WindowHeight, Mode=TwoWay}"
         Width="{Binding WindowWidth, Mode=TwoWay}"
         Background="Black"
-        Closed="MainWindow_OnClosed">
+        Closed="MainWindow_OnClosed"
+        KeyDown="MainWindow_OnKeyDown"
+        KeyUp="MainWindow_OnKeyUp">
     <Window.DataContext>
         <design:MainWindowViewModelStub/>
     </Window.DataContext>
@@ -25,7 +27,7 @@
         </Grid.RowDefinitions>
         <canvas:CanvasView x:Name="CanvasView" Grid.Row="0"
                            VerticalAlignment="Stretch" HorizontalAlignment="Stretch" 
-                           DataContext="{Binding Canvas}"/>
+                           DataContext="{Binding Canvas3d}"/>
         <GridSplitter Grid.Row="1" Background="DarkSlateGray" Height="5" ShowsPreview="False"
                       VerticalAlignment="Center" HorizontalAlignment="Stretch" />
         <loggingViews:LogConsoleView Grid.Row="2" DataContext="{Binding LogConsole}"/>

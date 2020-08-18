@@ -20,6 +20,8 @@ namespace Graphal.VisualDebug.Abstractions
         ILogConsoleViewModel LogConsole { get; }
 
         ICanvasViewModel Canvas { get; }
+        
+        ICanvasViewModel3d Canvas3d { get; }
 
         Task InitializeAsync();
 

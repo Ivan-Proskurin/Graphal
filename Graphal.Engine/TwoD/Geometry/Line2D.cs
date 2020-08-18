@@ -95,5 +95,26 @@ namespace Graphal.Engine.TwoD.Geometry
         {
             return _a == 0;
         }
+
+        public bool IntersectsWith(Line2D other)
+        {
+            var a1 = this._a;
+            var b1 = this._b;
+            var c1 = this._c;
+            var a2 = other._a;
+            var b2 = other._b;
+            var c2 = other._c;
+
+            var del = a2 * b1 - a1 * b2;
+            if (del == 0)
+            {
+                return false;
+            }
+
+            var x = (b2 * c1 - b1 * c2) / del;
+            var y = (-a1 * x - c1) / b1;
+            return x >= _v1.X && x <= _v2.X && y >= _v1.Y && y <= _v2.Y &&
+                   x >= other._v1.X && x <= other._v2.X && y >= other._v1.Y && y <= other._v2.Y;
+        }
     }
 }

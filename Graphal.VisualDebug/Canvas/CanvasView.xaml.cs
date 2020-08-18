@@ -28,14 +28,14 @@ namespace Graphal.VisualDebug.Canvas
         {
             if (ViewModel == null) return;
             var clickPoint = e.GetPosition(this);
-            await ViewModel.BeginShiftAsync((int)clickPoint.X, (int)clickPoint.Y);
+            // await ViewModel.BeginShiftAsync((int)clickPoint.X, (int)clickPoint.Y);
         }
 
         private async void CanvasView_OnMouseMove(object sender, MouseEventArgs e)
         {
             if (ViewModel == null || e.LeftButton != MouseButtonState.Pressed) return;
             var clickPoint = e.GetPosition(this);
-            await ViewModel.ShiftAsync((int)clickPoint.X, (int)clickPoint.Y);
+            // await ViewModel.ShiftAsync((int)clickPoint.X, (int)clickPoint.Y);
         }
 
         private async void CanvasView_OnMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
@@ -44,7 +44,7 @@ namespace Graphal.VisualDebug.Canvas
             // ViewModel?.SetPoint((int)clickPoint.X, (int)clickPoint.Y);
             if (ViewModel == null) return;
             var clickPoint = e.GetPosition(this);
-            await ViewModel.EndShiftAsync((int)clickPoint.X, (int)clickPoint.Y);
+            // await ViewModel.EndShiftAsync((int)clickPoint.X, (int)clickPoint.Y);
         }
 
         private void CanvasView_OnSizeChanged(object sender, SizeChangedEventArgs e)
@@ -66,6 +66,6 @@ namespace Graphal.VisualDebug.Canvas
             // ViewModel.EndShift((int)clickPoint.X, (int)clickPoint.Y);
         }
 
-        private ICanvasViewModel ViewModel => this.GetViewModel<ICanvasViewModel>();
+        private ICanvasViewModel3d ViewModel => this.GetViewModel<ICanvasViewModel3d>();
     }
 }

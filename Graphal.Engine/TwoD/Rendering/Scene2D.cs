@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Graphal.Engine.Abstractions.IntersectBehaviours;
 using Graphal.Engine.Abstractions.TwoD.Rendering;
 using Graphal.Engine.Persistence.TwoD;
 using Graphal.Engine.TwoD.Geometry;
@@ -17,16 +19,19 @@ namespace Graphal.Engine.TwoD.Rendering
     public class Scene2D : IScene2D
     {
         private readonly ICanvas2D _canvas;
+        private readonly IIntersectionFactory _intersectionFactory;
         private List<Primitive2D> _primitives = new List<Primitive2D>();
+        private List<RenderingFrame> _frames = new List<RenderingFrame>();
 
         private ShiftTransform2D _shift = new ShiftTransform2D(0, 0);
         private Vector2D? _shiftStart;
         private readonly ConcurrentQueue<ShiftTransform2D> _transformsQueue = new ConcurrentQueue<ShiftTransform2D>();
         private CancellationTokenSource _cancellationTokenSource;
 
-        public Scene2D(ICanvas2D canvas)
+        public Scene2D(ICanvas2D canvas, IIntersectionFactory intersectionFactory)
         {
             _canvas = canvas;
+            _intersectionFactory = intersectionFactory;
         }
 
         public void Append(Primitive2D primitive)
@@ -45,6 +50,11 @@ namespace Graphal.Engine.TwoD.Rendering
             }
         }
 
+        public void SetShift(Vector2D shift)
+        {
+            _shift = new ShiftTransform2D(shift.X, shift.Y);
+        }
+
         public async Task RenderAsync()
         {
             _canvas.BeginDraw();
@@ -52,9 +62,16 @@ namespace Graphal.Engine.TwoD.Rendering
             try
             {
                 _canvas.Clear();
-                var renderingTasks = _primitives
-                    .Select(x => Task.Run(() => x.Render(_canvas)));
-                await Task.WhenAll(renderingTasks);
+                foreach (var primitive in _primitives)
+                {
+                    primitive.Render(_canvas);
+                }
+                
+                await Task.CompletedTask;
+                // var renderingTasks = _frames
+                //     .Select(x => Task.Run(() => x.Render(_canvas)))
+                //     .ToArray();
+                // await Task.WhenAll(renderingTasks);
             }
             finally
             {
@@ -107,11 +124,19 @@ namespace Graphal.Engine.TwoD.Rendering
 
             _primitives = container.Primitives.Select(x => x.ToPrimitive2D()).ToList();
             ApplyTransform(_shift);
+            CreateRenderingFrames();
+        }
+
+        public void FromProjection(IEnumerable<Triangle2D> triangles)
+        {
+            _primitives = triangles.Cast<Primitive2D>().ToList();
+            ApplyTransform(_shift);
+            // CreateRenderingFrames();
         }
 
         public event FpsChangedEventHandler FpsChanged;
 
-        protected virtual void OnFpsChanged(FpsChangedArgs e)
+        private void OnFpsChanged(FpsChangedArgs e)
         {
             FpsChanged?.Invoke(this, e);
         }
@@ -121,6 +146,43 @@ namespace Graphal.Engine.TwoD.Rendering
             foreach (var primitive in _primitives)
             {
                 primitive.Transform(transform);
+            }
+        }
+
+        private void CreateRenderingFrames()
+        {
+            _frames.Clear();
+            
+            var primitives = _primitives.Select(x => x).ToList();
+            if (!primitives.Any())
+            {
+                return;
+            }
+
+            while (primitives.Count > 0)
+            {
+                var target = primitives.First();
+                primitives.Remove(target);
+                var pairs = primitives.Skip(1).ToList();
+                var together = new List<Primitive2D>();
+                together.Add(target);
+                foreach (var pair in pairs)
+                {
+                    var intersection = _intersectionFactory.CreateBehaviour(target, pair);
+                    if (intersection.Intersects())
+                    {
+                        together.Add(pair);
+                        primitives.Remove(pair);
+                    }
+                }
+
+                var frame = new RenderingFrame(together, _intersectionFactory);
+                _frames.Add(frame);
+            }
+
+            if (_frames.Sum(x => x.Capacity) != _primitives.Count)
+            {
+                throw new InvalidConstraintException();
             }
         }
 

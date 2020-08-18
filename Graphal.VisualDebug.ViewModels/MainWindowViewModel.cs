@@ -24,18 +24,22 @@ namespace Graphal.VisualDebug.ViewModels
         private readonly ILogger _logger;
         private readonly IPerformanceProfiler _performanceProfiler;
         private readonly IWindowAppearanceService _windowAppearanceService;
+        private readonly ICanvasViewModel3d _canvasViewModel3d;
 
         public MainWindowViewModel(
             ILogger logger,
             IPerformanceProfiler performanceProfiler,
             IWindowAppearanceService windowAppearanceService,
             ICanvasViewModel canvasViewModel,
+            ICanvasViewModel3d canvasViewModel3d,
             ILogConsoleViewModel logConsoleViewModel)
         {
             _logger = logger;
             _performanceProfiler = performanceProfiler;
             _windowAppearanceService = windowAppearanceService;
+            _canvasViewModel3d = canvasViewModel3d;
             Canvas = canvasViewModel;
+            Canvas3d = canvasViewModel3d;
             LogConsole = logConsoleViewModel;
         }
 
@@ -52,6 +56,8 @@ namespace Graphal.VisualDebug.ViewModels
         public ILogConsoleViewModel LogConsole { get; }
 
         public ICanvasViewModel Canvas { get; }
+
+        public ICanvasViewModel3d Canvas3d { get; }
 
         public async Task InitializeAsync()
         {

@@ -15,6 +15,7 @@ namespace Graphal.VisualDebug.ViewModels
             return services
                 .AddTransient<ILogConsoleViewModel, LogConsoleViewModel>()
                 .AddTransient<ICanvasViewModel, CanvasViewModel>()
+                .AddTransient<ICanvasViewModel3d, CanvasViewModel3d>()
                 .AddTransient<IMainWindowViewModel, MainWindowViewModel>();
         }
     }

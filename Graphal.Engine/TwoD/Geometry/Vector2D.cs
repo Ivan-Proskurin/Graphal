@@ -51,6 +51,31 @@ namespace Graphal.Engine.TwoD.Geometry
             return new Vector2D(vector1.X - vector2.X, vector1.Y - vector2.Y);
         }
 
+        public static bool operator ==(Vector2D vector1, Vector2D vector2)
+        {
+            return vector1.X == vector2.X && vector1.Y == vector2.Y;
+        }
+
+        public static bool operator !=(Vector2D vector1, Vector2D vector2)
+        {
+            return vector1.X != vector2.X || vector1.Y != vector2.Y;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is Vector2D vector)
+            {
+                return this.X == vector.X && this.Y == vector.Y;
+            }
+
+            return base.Equals(obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
         private static void Swap(ref Vector2D v1, ref Vector2D v2)
         {
             var v = v1;
