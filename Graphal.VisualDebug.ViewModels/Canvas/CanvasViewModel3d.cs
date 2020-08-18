@@ -7,7 +7,6 @@ using Graphal.Engine.Abstractions.ThreeD.Rendering;
 using Graphal.Engine.Abstractions.TwoD.Rendering;
 using Graphal.Engine.ThreeD.Geometry;
 using Graphal.Engine.ThreeD.Primitives;
-using Graphal.Engine.TwoD.Geometry;
 using Graphal.VisualDebug.Abstractions.Canvas;
 using Graphal.VisualDebug.Abstractions.Wrappers;
 

@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Data;
 using System.Drawing;
-using System.Threading;
 
 using Graphal.Engine.ThreeD.Colorimetry;
 using Graphal.Engine.ThreeD.Geometry;
@@ -145,14 +143,13 @@ namespace Graphal.Engine.ThreeD.Primitives
         private Color ApplyColorimetry(Color original, ColorimetryInfo colorimetry)
         {
             var normal = CalculateFullNormal();
-            var lightFallNormalized = colorimetry.LightFall.Normalize();
-            var g = ApplyColorimetryToComponent(original.G, colorimetry, lightFallNormalized, normal);
-            var r = ApplyColorimetryToComponent(original.R, colorimetry, lightFallNormalized, normal);
-            var b = ApplyColorimetryToComponent(original.B, colorimetry, lightFallNormalized, normal);
+            var g = ApplyColorimetryToComponent(original.G, colorimetry, normal);
+            var r = ApplyColorimetryToComponent(original.R, colorimetry, normal);
+            var b = ApplyColorimetryToComponent(original.B, colorimetry, normal);
             return Color.FromArgb(r, g, b);
         }
 
-        private static byte ApplyColorimetryToComponent(byte original, ColorimetryInfo colorimetry, Vector3D light, Vector3D normal)
+        private static byte ApplyColorimetryToComponent(byte original, ColorimetryInfo colorimetry, Vector3D normal)
         {
             if (original == 0)
             {
