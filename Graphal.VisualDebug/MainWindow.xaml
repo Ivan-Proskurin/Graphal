@@ -14,8 +14,7 @@
         Width="{Binding WindowWidth, Mode=TwoWay}"
         Background="Black"
         Closed="MainWindow_OnClosed"
-        KeyDown="MainWindow_OnKeyDown"
-        KeyUp="MainWindow_OnKeyUp">
+        KeyDown="MainWindow_OnKeyDown">
     <Window.DataContext>
         <design:MainWindowViewModelStub/>
     </Window.DataContext>

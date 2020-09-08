@@ -30,26 +30,6 @@ namespace Graphal.VisualDebug
         {
             if (ViewModel == null) return;
 
-            if (e.Key == Key.Left)
-            {
-                await ViewModel.Canvas3d.RotateLeftAsync();
-            }
-
-            if (e.Key == Key.Right)
-            {
-                await ViewModel.Canvas3d.RotateRightAsync();
-            }
-
-            if (e.Key == Key.Up)
-            {
-                await ViewModel.Canvas3d.RotateUpAsync();
-            }
-
-            if (e.Key == Key.Down)
-            {
-                await ViewModel.Canvas3d.RotateDownAsync();
-            }
-
             if (e.Key == Key.W)
             {
                 await ViewModel.Canvas3d.MoveCloser();
@@ -58,21 +38,6 @@ namespace Graphal.VisualDebug
             if (e.Key == Key.S)
             {
                 await ViewModel.Canvas3d.MoveFurther();
-            }
-        }
-
-        private async void MainWindow_OnKeyUp(object sender, KeyEventArgs e)
-        {
-            if (ViewModel == null) return;
-
-            switch (e.Key)
-            {
-                case Key.Up:
-                case Key.Down:
-                case Key.Left:
-                case Key.Right:
-                    await ViewModel.Canvas3d.StopRotationAsync();
-                    break;
             }
         }
     }

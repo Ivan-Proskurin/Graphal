@@ -16,7 +16,6 @@ namespace Graphal.Engine.TwoD.Primitives
         private Vector2D _v1;
         private Vector2D _v2;
         private Line2D _line;
-        private EmbracingRect _rect;
 
         public Edge2D(Vector2D v1, Vector2D v2, Color color)
         {
@@ -35,19 +34,17 @@ namespace Graphal.Engine.TwoD.Primitives
 
         public override void Transform(Transform2D transform)
         {
-            throw new System.NotImplementedException();
+            _v1 = transform.Apply(_originalV1);
+            _v2 = transform.Apply(_originalV2);
+            UpdateGeometry();
         }
 
         public override void Render(ICanvas2D canvas)
         {
-            for (var y = _rect.Top; y <= _rect.Bottom; y++)
+            using (var enumerator = _line.Render(canvas, _color).GetEnumerator())
             {
-                for (var x = _rect.Left; x <= _rect.Right; x++)
+                while (enumerator.MoveNext())
                 {
-                    if (_line.Test(x, y, 0))
-                    {
-                        canvas.Set(x, y, _color);
-                    }
                 }
             }
         }
@@ -65,9 +62,6 @@ namespace Graphal.Engine.TwoD.Primitives
         private void UpdateGeometry()
         {
             _line = new Line2D(_v1, _v2);
-            _rect = EmbracingRect.Empty;
-            _rect.ExtendBy(_v1.X, _v1.Y);
-            _rect.ExtendBy(_v2.X, _v2.Y);
         }
     }
 }

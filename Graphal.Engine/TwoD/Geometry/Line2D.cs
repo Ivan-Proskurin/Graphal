@@ -1,4 +1,7 @@
-﻿using System;
+﻿using System.Collections.Generic;
+using System.Drawing;
+
+using Graphal.Engine.Abstractions.TwoD.Rendering;
 
 namespace Graphal.Engine.TwoD.Geometry
 {
@@ -11,8 +14,6 @@ namespace Graphal.Engine.TwoD.Geometry
         private readonly int _c;
         private readonly int _d1;
         private readonly int _d2;
-        private readonly int _dx1;
-        private readonly int _dx2;
 
         public Line2D(Vector2D v1, Vector2D v2)
         {
@@ -22,33 +23,106 @@ namespace Graphal.Engine.TwoD.Geometry
             _b = v1.X - v2.X;
             _c = (v1.Y - v2.Y) * v2.X - v2.Y * (v1.X - v2.X);
 
-            var sign = -Math.Sign(_a * _b);
             _d1 = 0;
             _d2 = 0;
-            // _d1 = (int)(_a * (v1.X - sign * 0.5) + _b * (v1.Y + 0.5) + _c);
-            // _d2 = (int)(_a * (v1.X + sign * 0.5) + _b * (v1.Y - 0.5) + _c);
-            _dx1 = _a != 0 ? (int)Math.Round(v1.X - sign * 0.5 + (_b * (v1.Y + 0.5) + _c) / _a) : 0;
-            _dx2 = _a != 0 ? (int)Math.Round(v1.X + sign * 0.5 + (_b * (v1.Y - 0.5) + _c) / _a) : 0;
-            // if (_d1 > _d2)
-            // {
-            //     var d = _d1;
-            //     _d1 = _d2;
-            //     _d2 = d;
-            // }
+        }
 
-            if (_dx1 > _dx2)
+        public IEnumerable<int> Render(ICanvas2D canvas, Color color) 
+        {
+            // sorting X
+            var x1 = X1;
+            var x2 = X2;
+            if (x1 > x2)
             {
-                var dx = _dx1;
-                _dx1 = _dx2;
-                _dx2 = dx;
+                var dx = x1;
+                x1 = x2;
+                x2 = dx;
             }
 
-            if (_b < 0)
+            // sorting Y
+            var y1 = Y1;
+            var y2 = Y2;
+            if (y1 > y2)
             {
-                var dx = _dx1;
-                _dx1 = _dx2;
-                _dx2 = dx;
+                var dy = y1;
+                y1 = y2;
+                y2 = dy;
             }
+
+            if (_a == 0)
+            {
+                // horizontal
+                for (var x = x1; x <= x2; x++)
+                {
+                    canvas.Set(x, Y1, color);
+                }
+
+                yield return x1;
+            }
+            else if (_b == 0)
+            {
+                // vertical
+                for (var y = y1; y <= y2; y++)
+                {
+                    canvas.Set(X1, y, color);
+                    yield return X1;
+                }
+            }
+            else
+            {
+                var d = _a / _b;
+                var w = _b / _a;
+                // steep sloping up/down
+                if (d >= 1 || d <= -1)
+                {
+                    for (var y = y1; y <= y2; y++)
+                    {
+                        var x = GetXByY(y);
+                        canvas.Set(x, y, color);
+                        yield return x;
+                    }
+                }
+                // slow sloping up
+                else if (w >= 1)
+                {
+                    var currentY = (int?)null;
+                    for (var x = x2; x >= x1; x--)
+                    {
+                        var y = GetYByX(x);
+                        canvas.Set(x, y, color);
+                        if (currentY != y)
+                        {
+                            currentY = y;
+                            yield return x;
+                        }
+                    }
+                }
+                // slow slopping down
+                else if (w <= -1)
+                {
+                    var currentY = (int?)null;
+                    for (var x = x1; x <= x2; x++)
+                    {
+                        var y = GetYByX(x);
+                        canvas.Set(x, y, color);
+                        if (currentY != y)
+                        {
+                            currentY = y;
+                            yield return x;
+                        }
+                    }
+                }
+            }
+        }
+
+        private int GetXByY(int y)
+        {
+            return (-_b * y - _c) / _a;
+        }
+
+        private int GetYByX(int x)
+        {
+            return (-_a * x - _c) / _b;
         }
 
         public int X1 => _v1.X;
@@ -79,21 +153,6 @@ namespace Graphal.Engine.TwoD.Geometry
             }
 
             return test >= _d1;
-        }
-
-        public int IntersectYToLeft(int y)
-        {
-            return (_dx1 - _c - _b * y) / _a;
-        }
-
-        public int IntersectYToRight(int y)
-        {
-            return (_dx2 - _c - _b * y) / _a;
-        }
-
-        public bool IsHorizontal()
-        {
-            return _a == 0;
         }
 
         public bool IntersectsWith(Line2D other)

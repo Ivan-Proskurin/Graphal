@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Graphal.Engine.Abstractions.IntersectBehaviours;
+using Graphal.Engine.Abstractions.Logging;
 using Graphal.Engine.Abstractions.TwoD.Rendering;
 using Graphal.Engine.Persistence.TwoD;
 using Graphal.Engine.TwoD.Geometry;
@@ -20,6 +21,7 @@ namespace Graphal.Engine.TwoD.Rendering
     {
         private readonly ICanvas2D _canvas;
         private readonly IIntersectionFactory _intersectionFactory;
+        private readonly ILogger _logger;
         private List<Primitive2D> _primitives = new List<Primitive2D>();
         private List<RenderingFrame> _frames = new List<RenderingFrame>();
 
@@ -28,10 +30,11 @@ namespace Graphal.Engine.TwoD.Rendering
         private readonly ConcurrentQueue<ShiftTransform2D> _transformsQueue = new ConcurrentQueue<ShiftTransform2D>();
         private CancellationTokenSource _cancellationTokenSource;
 
-        public Scene2D(ICanvas2D canvas, IIntersectionFactory intersectionFactory)
+        public Scene2D(ICanvas2D canvas, IIntersectionFactory intersectionFactory, ILogger logger)
         {
             _canvas = canvas;
             _intersectionFactory = intersectionFactory;
+            _logger = logger;
         }
 
         public void Append(Primitive2D primitive)
@@ -127,11 +130,10 @@ namespace Graphal.Engine.TwoD.Rendering
             CreateRenderingFrames();
         }
 
-        public void FromProjection(IEnumerable<Triangle2D> triangles)
+        public void FromProjection(IEnumerable<Primitive2D> primitives)
         {
-            _primitives = triangles.Cast<Primitive2D>().ToList();
+            _primitives = primitives.ToList();
             ApplyTransform(_shift);
-            // CreateRenderingFrames();
         }
 
         public event FpsChangedEventHandler FpsChanged;

@@ -63,7 +63,7 @@
           <DependentUpon>CanvasView.xaml</DependentUpon>
         </Compile>
         <Compile Include="Converters\DrawingColorToMediaBrushConverter.cs" />
-        <Compile Include="Helpers\DataContextHelper.cs" />
+        <Compile Include="Helpers\ViewHelper.cs" />
         <Compile Include="LogConsole\LogConsoleView.xaml.cs">
           <DependentUpon>LogConsoleView.xaml</DependentUpon>
         </Compile>

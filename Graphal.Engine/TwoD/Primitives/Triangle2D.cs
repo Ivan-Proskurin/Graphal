@@ -54,82 +54,41 @@ namespace Graphal.Engine.TwoD.Primitives
 
         public override void Render(ICanvas2D canvas)
         {
-            if (_v2.X < _v3.X)
+            var y = _v1.Y;
+            using (var line1Enumerator = _line1.Render(canvas, _color).GetEnumerator())
+            using (var line2Enumerator = _line2.Render(canvas, _color).GetEnumerator())
+            using (var line3Enumerator = _line3.Render(canvas, _color).GetEnumerator())
             {
-                RenderBetween(_v1, _v2, _line1, _line3, canvas);
-                RenderBetween(_v2, _v3, _line2, _line3, canvas);
-            }
-            else
-            {
-                RenderBetween(_v1, _v2, _line3, _line1, canvas);
-                RenderBetween(_v2, _v3, _line3, _line2, canvas);
-            }
-        }
-
-        private void RenderBetween(Vector2D v1, Vector2D v2, Line2D line1, Line2D line2, ICanvas2D canvas)
-        {
-            var y1 = v1.Y;
-            var y2 = v2.Y;
-
-            if (line1.IsHorizontal())
-            {
-                RenderStroke(line1.X1, line1.X2, line1.Y1, canvas);
-                return;
-            }
-
-            if (line2.IsHorizontal())
-            {
-                RenderStroke(line2.X1, line2.X2, line2.Y1, canvas);
-                return;
-            }
-
-            for (var y = y1; y <= y2; y++)
-            {
-                var x1 = line1.IntersectYToLeft(y);
-                if (x1 < _rect.Left)
+                var contrEnumerator = line1Enumerator;
+                while (line3Enumerator.MoveNext())
                 {
-                    x1 = _rect.Left;
+                    if (!contrEnumerator.MoveNext())
+                    {
+                        contrEnumerator = line2Enumerator;
+                        contrEnumerator.MoveNext();
+                    }
+
+                    var x1 = contrEnumerator.Current;
+                    var x2 = line3Enumerator.Current;
+                    if (x1 > x2)
+                    {
+                        var d = x1;
+                        x1 = x2;
+                        x2 = d;
+                    }
+                    
+                    for (var x = x1; x <= x2; x++)
+                    {
+                        canvas.Set(x, y, _color);
+                    }
+
+                    y++;
                 }
 
-                var x2 = line2.IntersectYToRight(y);
-                if (x2 > _rect.Right)
+                while (contrEnumerator.MoveNext())
                 {
-                    x2 = _rect.Right;
+                    
                 }
-
-                if (x1 == x2)
-                {
-                    canvas.Set(x1, y, _color);
-                }
-                else
-                {
-                    RenderStroke(x1, x2, y, canvas);
-                }
-            }
-        }
-
-        private void RenderStroke(int x1, int x2, int y, ICanvas2D canvas)
-        {
-            if (x1 > x2)
-            {
-                var d = x1;
-                x1 = x2;
-                x2 = d;
-            }
-
-            if (x1 < _rect.Left)
-            {
-                x1 = _rect.Left;
-            }
-
-            if (x2 > _rect.Right)
-            {
-                x2 = _rect.Right;
-            }
-            
-            for (var x = x1; x <= x2; x++)
-            {
-                canvas.Set(x, y, _color);
             }
         }
         

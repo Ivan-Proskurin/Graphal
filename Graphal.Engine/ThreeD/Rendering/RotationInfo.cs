@@ -9,6 +9,8 @@
     public enum RotationType
     {
        RotationXZ,
+       StopRotationXZ,
        RotationYZ,
+       StopRotationYZ,
     }
 }

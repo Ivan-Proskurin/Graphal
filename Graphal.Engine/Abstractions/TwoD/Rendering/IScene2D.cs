@@ -29,8 +29,8 @@ namespace Graphal.Engine.Abstractions.TwoD.Rendering
 
         void FromScene2Ds(Scene2Ds container);
 
-        void FromProjection(IEnumerable<Triangle2D> triangles);
-        
+        void FromProjection(IEnumerable<Primitive2D> triangles);
+
         event FpsChangedEventHandler FpsChanged;
     }
 

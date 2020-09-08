@@ -73,7 +73,7 @@ namespace Graphal.Engine.TwoD.Geometry
 
         public override int GetHashCode()
         {
-            return base.GetHashCode();
+            return X | (Y << 6);
         }
 
         private static void Swap(ref Vector2D v1, ref Vector2D v2)

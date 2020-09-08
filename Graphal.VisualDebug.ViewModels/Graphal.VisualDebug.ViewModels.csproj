@@ -6,6 +6,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Graphal.Engine\Graphal.Engine.csproj" />
+      <ProjectReference Include="..\Graphal.RubiksCube.Core\Graphal.RubiksCube.Core.csproj" />
       <ProjectReference Include="..\Graphal.Tools.Abstractions\Graphal.Tools.Abstractions.csproj" />
       <ProjectReference Include="..\Graphal.Tools.Storage.Abstractions\Graphal.Tools.Storage.Abstractions.csproj" />
       <ProjectReference Include="..\Graphal.VisualDebug.Abstractions\Graphal.VisualDebug.Abstractions.csproj" />

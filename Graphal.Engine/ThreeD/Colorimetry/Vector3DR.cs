@@ -1,6 +1,7 @@
 ﻿using System;
 
 using Graphal.Engine.ThreeD.Geometry;
+using Graphal.Engine.TwoD.Geometry;
 
 namespace Graphal.Engine.ThreeD.Colorimetry
 {
@@ -37,9 +38,21 @@ namespace Graphal.Engine.ThreeD.Colorimetry
             return new Vector3DR(X, y, z);
         }
 
+        public Vector3DR Add(Vector3D other)
+        {
+            return new Vector3DR(X + other.X, Y + other.Y, Z + other.Z);
+        }
+
         public Vector3D ToVector3D()
         {
             return new Vector3D((int)Math.Round(X), (int)Math.Round(Y), (int)Math.Round(Z));
+        }
+        
+        public Vector2D Project(int d)
+        {
+            var x = X * d / Z;
+            var y = Y * d / Z;
+            return new Vector2D((int)Math.Round(x), (int)Math.Round(y));
         }
     }
 }

@@ -17,37 +17,32 @@ namespace Graphal.VisualDebug.Design.ViewModels.Canvas
             throw new System.NotImplementedException();
         }
 
-        public Task RotateLeftAsync()
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public Task RotateRightAsync()
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public Task RotateUpAsync()
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public Task RotateDownAsync()
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public Task StopRotationAsync()
-        {
-            throw new System.NotImplementedException();
-        }
-
         public Task MoveCloser()
         {
             throw new System.NotImplementedException();
         }
 
         public Task MoveFurther()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Task StartRotateAsync(int x, int y)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Task ContinueRotateAsync(int x, int y)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Task StopRotateAsync(int x, int y)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void DetectTriangles(int x, int y)
         {
             throw new System.NotImplementedException();
         }

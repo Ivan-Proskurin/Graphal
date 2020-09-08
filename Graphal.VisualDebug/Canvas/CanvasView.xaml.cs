@@ -27,24 +27,27 @@ namespace Graphal.VisualDebug.Canvas
         private async void CanvasView_OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (ViewModel == null) return;
-            var clickPoint = e.GetPosition(this);
+            var (x, y) = e.GetClickPoint(this);
+            // ViewModel.DetectTriangles((int)clickPoint.X, (int)clickPoint.Y);
             // await ViewModel.BeginShiftAsync((int)clickPoint.X, (int)clickPoint.Y);
+            await ViewModel.StartRotateAsync(x, y);
         }
 
         private async void CanvasView_OnMouseMove(object sender, MouseEventArgs e)
         {
             if (ViewModel == null || e.LeftButton != MouseButtonState.Pressed) return;
-            var clickPoint = e.GetPosition(this);
+            var (x, y) = e.GetClickPoint(this);
             // await ViewModel.ShiftAsync((int)clickPoint.X, (int)clickPoint.Y);
+            await ViewModel.ContinueRotateAsync(x, y);
         }
 
         private async void CanvasView_OnMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            // var clickPoint = e.GetPosition(this);
-            // ViewModel?.SetPoint((int)clickPoint.X, (int)clickPoint.Y);
             if (ViewModel == null) return;
-            var clickPoint = e.GetPosition(this);
+            // ViewModel?.SetPoint((int)clickPoint.X, (int)clickPoint.Y);
+            var (x, y) = e.GetClickPoint(this);
             // await ViewModel.EndShiftAsync((int)clickPoint.X, (int)clickPoint.Y);
+            await ViewModel.StopRotateAsync(x, y);
         }
 
         private void CanvasView_OnSizeChanged(object sender, SizeChangedEventArgs e)
