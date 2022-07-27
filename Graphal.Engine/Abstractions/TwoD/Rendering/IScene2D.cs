@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using Graphal.Engine.Persistence.TwoD;
@@ -30,18 +29,5 @@ namespace Graphal.Engine.Abstractions.TwoD.Rendering
         void FromScene2Ds(Scene2Ds container);
 
         void FromProjection(IEnumerable<Primitive2D> triangles);
-
-        event FpsChangedEventHandler FpsChanged;
     }
-
-    public class FpsChangedArgs : EventArgs
-    {
-        public FpsChangedArgs(int fps)
-        {
-            Fps = fps;
-        }
-        public int Fps { get; }
-    }
-    
-    public delegate void FpsChangedEventHandler(object sender, FpsChangedArgs e);
 }

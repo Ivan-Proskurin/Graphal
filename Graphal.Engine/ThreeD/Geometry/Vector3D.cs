@@ -2,7 +2,6 @@
 using System.Linq;
 
 using Graphal.Engine.ThreeD.Colorimetry;
-using Graphal.Engine.TwoD.Geometry;
 
 namespace Graphal.Engine.ThreeD.Geometry
 {

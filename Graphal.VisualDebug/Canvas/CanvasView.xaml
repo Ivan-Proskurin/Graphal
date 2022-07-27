@@ -12,7 +12,8 @@
              MouseLeftButtonDown="CanvasView_OnMouseLeftButtonDown"
              MouseRightButtonDown="CanvasView_OnMouseRightButtonDown"
              MouseRightButtonUp="CanvasView_OnMouseRightButtonUp"
-             MouseMove="CanvasView_OnMouseMove">
+             MouseMove="CanvasView_OnMouseMove"
+             MouseWheel="CanvasView_OnMouseWheel">
     <UserControl.DataContext>
         <design:CanvasViewModel3dStub/>
     </UserControl.DataContext>

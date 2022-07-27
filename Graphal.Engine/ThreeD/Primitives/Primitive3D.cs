@@ -12,18 +12,16 @@ namespace Graphal.Engine.ThreeD.Primitives
 
         public abstract void MoveFurtherByGrade(double grade);
 
-        public abstract int NormalZ { get; }
+        public abstract int CalculateNormalZ();
 
         public abstract double DeepLevel();
 
-        public abstract Primitive2D Project(int d, ColorimetryInfo colorimetry);
+        public abstract Primitive2D Project(int d, ColorimetryInfo colorimetry, object owner = null);
 
-        public abstract void RotateXZ(double radinans);
+        public abstract void StartRotation();
 
-        public abstract void ApplyRotationXZ(double radians);
+        public abstract void Rotate(double radiansXZ, double radiansYZ);
 
-        public abstract void RotateYZ(double radinans);
-
-        public abstract void ApplyRotationYZ(double radians);
+        public abstract void StopRotation();
     }
 }

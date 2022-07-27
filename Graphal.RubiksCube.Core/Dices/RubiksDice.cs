@@ -5,6 +5,7 @@ using System.Linq;
 
 using Graphal.Engine.ThreeD.Geometry;
 using Graphal.Engine.ThreeD.Primitives;
+using Graphal.RubiksCube.Core.Extensions;
 
 namespace Graphal.RubiksCube.Core.Dices
 {
@@ -14,17 +15,15 @@ namespace Graphal.RubiksCube.Core.Dices
         private readonly Vector3D _position;
         private readonly Dictionary<FacetOrientation, CubeColorFacet> _facets = new Dictionary<FacetOrientation, CubeColorFacet>();
 
-        public RubiksDice(int size, Vector3D position)
+        public RubiksDice(int size, Vector3D position, CubeDimension[] dimensions)
         {
             _size = size;
             _position = position;
+            Dimensions = dimensions.GetPosition();
             InitDefaultFacets();
         }
 
-        public void AddFacet(FacetOrientation orientation, Color color)
-        {
-            _facets[orientation] = CreateFacet(color, orientation, GetFacetInvertion(orientation));
-        }
+        public CubeDimension Dimensions { get; set; }
 
         public IEnumerable<Triangle3D> GetTriangles()
         {
@@ -36,8 +35,44 @@ namespace Graphal.RubiksCube.Core.Dices
             foreach (var orientationObj in Enum.GetValues(typeof(FacetOrientation)))
             {
                 var orientation = (FacetOrientation) orientationObj;
-                _facets[orientation] = CreateFacet(null, orientation, GetFacetInvertion(orientation));
+                var color = GetFacetColorByDimensions(orientation);
+                _facets[orientation] = CreateFacet(color, orientation, GetFacetInvertion(orientation));
             }
+        }
+
+        private Color? GetFacetColorByDimensions(FacetOrientation orientation)
+        {
+            switch (orientation)
+            {
+                case FacetOrientation.West:
+                    if (Dimensions.IsInDimension(CubeDimension.West))
+                        return RubikCube.WestColor;
+                    break;
+                case FacetOrientation.East:
+                    if (Dimensions.IsInDimension(CubeDimension.East))
+                        return RubikCube.EastColor;
+                    break;
+                case FacetOrientation.North:
+                    if (Dimensions.IsInDimension(CubeDimension.North))
+                        return RubikCube.NorthColor;
+                    break;
+                case FacetOrientation.South:
+                    if (Dimensions.IsInDimension(CubeDimension.South))
+                        return RubikCube.SouthColor;
+                    break;
+                case FacetOrientation.Top:
+                    if (Dimensions.IsInDimension(CubeDimension.Top))
+                        return RubikCube.TopColor;
+                    break;
+                case FacetOrientation.Bottom:
+                    if (Dimensions.IsInDimension(CubeDimension.Bottom))
+                        return RubikCube.BottomColor;
+                    break;
+                default:
+                    return null;
+            }
+
+            return null;
         }
 
         private CubeColorFacet CreateFacet(Color? color, FacetOrientation orientation, bool invertion)

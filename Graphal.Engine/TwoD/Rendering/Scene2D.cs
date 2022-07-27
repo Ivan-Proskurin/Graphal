@@ -136,13 +136,6 @@ namespace Graphal.Engine.TwoD.Rendering
             ApplyTransform(_shift);
         }
 
-        public event FpsChangedEventHandler FpsChanged;
-
-        private void OnFpsChanged(FpsChangedArgs e)
-        {
-            FpsChanged?.Invoke(this, e);
-        }
-
         private void ApplyTransform(Transform2D transform)
         {
             foreach (var primitive in _primitives)
@@ -226,7 +219,7 @@ namespace Graphal.Engine.TwoD.Rendering
             {
                 stopwatch.Stop();
                 var fps = (int)(framesCount * 1000 / stopwatch.ElapsedMilliseconds);
-                OnFpsChanged(new FpsChangedArgs(fps));
+                _logger.Info($"FPS: {fps}");
             }
         }
 

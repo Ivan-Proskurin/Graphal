@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 
@@ -26,28 +27,10 @@ namespace Graphal.VisualDebug.Canvas
 
         private async void CanvasView_OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (ViewModel == null) return;
-            var (x, y) = e.GetClickPoint(this);
-            // ViewModel.DetectTriangles((int)clickPoint.X, (int)clickPoint.Y);
-            // await ViewModel.BeginShiftAsync((int)clickPoint.X, (int)clickPoint.Y);
-            await ViewModel.StartRotateAsync(x, y);
-        }
-
-        private async void CanvasView_OnMouseMove(object sender, MouseEventArgs e)
-        {
-            if (ViewModel == null || e.LeftButton != MouseButtonState.Pressed) return;
-            var (x, y) = e.GetClickPoint(this);
-            // await ViewModel.ShiftAsync((int)clickPoint.X, (int)clickPoint.Y);
-            await ViewModel.ContinueRotateAsync(x, y);
         }
 
         private async void CanvasView_OnMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            if (ViewModel == null) return;
-            // ViewModel?.SetPoint((int)clickPoint.X, (int)clickPoint.Y);
-            var (x, y) = e.GetClickPoint(this);
-            // await ViewModel.EndShiftAsync((int)clickPoint.X, (int)clickPoint.Y);
-            await ViewModel.StopRotateAsync(x, y);
         }
 
         private void CanvasView_OnSizeChanged(object sender, SizeChangedEventArgs e)
@@ -55,20 +38,36 @@ namespace Graphal.VisualDebug.Canvas
             ViewModel?.Resize((int)e.NewSize.Width, (int)e.NewSize.Height);
         }
 
-        private void CanvasView_OnMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        private async void CanvasView_OnMouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (ViewModel == null) return;
-            var clickPoint = e.GetPosition(this);
-            // ViewModel.BeginShift((int)clickPoint.X, (int)clickPoint.Y);
+            var (x, y) = e.GetClickPointAsDouble(this);
+            await ViewModel.StartRotateAsync(x, y);
         }
 
-        private void CanvasView_OnMouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        private async void CanvasView_OnMouseRightButtonUp(object sender, MouseButtonEventArgs e)
         {
             if (ViewModel == null) return;
-            var clickPoint = e.GetPosition(this);
-            // ViewModel.EndShift((int)clickPoint.X, (int)clickPoint.Y);
+            var (x, y) = e.GetClickPointAsDouble(this);
+            await ViewModel.StopRotateAsync(x, y);
+        }
+        
+        private async void CanvasView_OnMouseMove(object sender, MouseEventArgs e)
+        {
+            if (ViewModel == null || e.RightButton != MouseButtonState.Pressed) return;
+            var (x, y) = e.GetClickPointAsDouble(this);
+            await ViewModel.ContinueRotateAsync(x, y);
         }
 
         private ICanvasViewModel3d ViewModel => this.GetViewModel<ICanvasViewModel3d>();
+
+        private async void CanvasView_OnMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            var grade = e.Delta / 1000d;
+            if (grade > 0)
+                await ViewModel.MoveCloser(Math.Abs(grade));
+            else
+                await ViewModel.MoveFurther(Math.Abs(grade));
+        }
     }
 }

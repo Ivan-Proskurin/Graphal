@@ -7,6 +7,7 @@ namespace Graphal.VisualDebug.Design.ViewModels.Canvas
     public class CanvasViewModel3dStub : ICanvasViewModel3d
     {
         public object ImageSource { get; }
+
         public void Resize(int width, int height)
         {
             throw new System.NotImplementedException();
@@ -17,27 +18,32 @@ namespace Graphal.VisualDebug.Design.ViewModels.Canvas
             throw new System.NotImplementedException();
         }
 
-        public Task MoveCloser()
+        public Task MoveCloser(double grade)
         {
             throw new System.NotImplementedException();
         }
 
-        public Task MoveFurther()
+        public Task MoveFurther(double grade)
         {
             throw new System.NotImplementedException();
         }
 
-        public Task StartRotateAsync(int x, int y)
+        public Task StartRotateAsync(double x, double y)
         {
             throw new System.NotImplementedException();
         }
 
-        public Task ContinueRotateAsync(int x, int y)
+        public Task ContinueRotateAsync(double x, double y)
         {
             throw new System.NotImplementedException();
         }
 
-        public Task StopRotateAsync(int x, int y)
+        public Task StopRotateAsync(double x, double y)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Task RotateCubeDimension(bool reverse)
         {
             throw new System.NotImplementedException();
         }

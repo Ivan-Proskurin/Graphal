@@ -2,14 +2,12 @@
 using System.Drawing;
 using System.Threading.Tasks;
 
-using Graphal.Engine.Abstractions.Logging;
 using Graphal.Engine.Abstractions.Profile;
 using Graphal.Engine.Abstractions.TwoD.Rendering;
 using Graphal.Engine.TwoD.Geometry;
 using Graphal.Engine.TwoD.Primitives;
 using Graphal.Tools.Abstractions.Persistence;
 using Graphal.VisualDebug.Abstractions.Canvas;
-using Graphal.VisualDebug.Abstractions.Wrappers;
 
 namespace Graphal.VisualDebug.ViewModels.Canvas
 {
@@ -24,12 +22,10 @@ namespace Graphal.VisualDebug.ViewModels.Canvas
             Color.DarkOrchid,
         };
 
-        private readonly ILogger _logger;
         private readonly IScenePersistenceService _scenePersistenceService;
         private readonly IPerformanceProfiler _performanceProfiler;
         private readonly IScene2D _scene;
         private readonly IBitmapSource _bitmapSource;
-        private readonly IDispatcherWrapper _dispatcherWrapper;
         private readonly List<Vector2D> _vectors = new List<Vector2D>();
         private int _colorIndex;
 
@@ -37,19 +33,15 @@ namespace Graphal.VisualDebug.ViewModels.Canvas
         private int _height;
 
         public CanvasViewModel(
-            ILogger logger,
             IScenePersistenceService scenePersistenceService,
             IPerformanceProfiler performanceProfiler,
             IScene2D scene,
-            IBitmapSource bitmapSource,
-            IDispatcherWrapper dispatcherWrapper)
+            IBitmapSource bitmapSource)
         {
-            _logger = logger;
             _scenePersistenceService = scenePersistenceService;
             _performanceProfiler = performanceProfiler;
             _scene = scene;
             _bitmapSource = bitmapSource;
-            _dispatcherWrapper = dispatcherWrapper;
         }
 
         public object ImageSource => _bitmapSource.Bitmap;
@@ -58,7 +50,6 @@ namespace Graphal.VisualDebug.ViewModels.Canvas
         {
             using (var session = _performanceProfiler.CreateSession())
             {
-                _scene.FpsChanged += SceneOnFpsChanged;
                 var sceneContainer = await _scenePersistenceService.LoadScene2DAsync();
                 if (sceneContainer == null)
                 {
@@ -151,11 +142,6 @@ namespace Graphal.VisualDebug.ViewModels.Canvas
             }
 
             return color;
-        }
-
-        private void SceneOnFpsChanged(object sender, FpsChangedArgs e)
-        {
-            _dispatcherWrapper.Invoke(() => _logger.Info($"FPS: {e.Fps}"));
-        }
+        } 
     }
 }

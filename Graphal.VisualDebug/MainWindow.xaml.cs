@@ -30,14 +30,14 @@ namespace Graphal.VisualDebug
         {
             if (ViewModel == null) return;
 
-            if (e.Key == Key.W)
+            if (e.Key == Key.A)
             {
-                await ViewModel.Canvas3d.MoveCloser();
+                await ViewModel.Canvas3d.RotateCubeDimension(false);
             }
 
-            if (e.Key == Key.S)
+            if (e.Key == Key.D)
             {
-                await ViewModel.Canvas3d.MoveFurther();
+                await ViewModel.Canvas3d.RotateCubeDimension(true);
             }
         }
     }

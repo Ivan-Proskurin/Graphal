@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-using Graphal.Engine.Abstractions.TwoD.Rendering;
 using Graphal.Engine.ThreeD.Geometry;
 using Graphal.Engine.ThreeD.Primitives;
 
@@ -12,6 +11,8 @@ namespace Graphal.Engine.Abstractions.ThreeD.Rendering
         void Append(Triangle3D triangle);
 
         void Append(IEnumerable<Triangle3D> triangles);
+
+        void Append(Object3D object3D);
 
         void Append(Edge3D edge);
 
@@ -25,12 +26,14 @@ namespace Graphal.Engine.Abstractions.ThreeD.Rendering
 
         Task MoveSceneFurther(double grade);
 
-        Task StartRotateAsync(int x, int y);
+        Task StartRotateAsync(double x, double y);
 
-        Task ContinueRotateAsync(int x, int y);
+        Task ContinueRotateAsync(double x, double y);
 
-        Task StopRotateAsync(int x, int y);
+        Task StopRotateAsync(double x, double y);
 
-        event FpsChangedEventHandler FpsChanged;
+        Task RotateCubeDimension(bool reverse);
+
+        Task RotateCubeDimension(int cubeDimension, bool reverse);
     }
 }

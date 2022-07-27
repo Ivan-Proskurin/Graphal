@@ -21,5 +21,18 @@ namespace Graphal.VisualDebug.Helpers
             var clickPoint = e.GetPosition(relativeTo);
             return ((int) clickPoint.X, (int) clickPoint.Y);
         }
+
+        public static (double x, double y) GetClickPointAsDouble(this MouseButtonEventArgs e, IInputElement relativeTo)
+        {
+            var clickPoint = e.GetPosition(relativeTo);
+            return (clickPoint.X, clickPoint.Y);
+        }
+        
+        public static (double x, double y) GetClickPointAsDouble(this MouseEventArgs e, IInputElement relativeTo)
+        {
+            var clickPoint = e.GetPosition(relativeTo);
+            return (clickPoint.X, clickPoint.Y);
+        }
+
     }
 }

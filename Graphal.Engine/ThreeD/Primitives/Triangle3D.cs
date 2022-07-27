@@ -9,40 +9,38 @@ namespace Graphal.Engine.ThreeD.Primitives
 {
     public class Triangle3D : Primitive3D
     {
-        private Vector3D _origv1;
-        private Vector3D _origv2;
-        private Vector3D _origv3;
         private Vector3DR _v1;
         private Vector3DR _v2;
         private Vector3DR _v3;
         private readonly Color _color;
-        private int _normalZ;
         private Vector3D _position;
-        private double _baseRadiansXZ;
-        private double _baseRadiansYZ;
-        private double _radiansXZ;
-        private double _radiansYZ;
+        private Vector3DR _rotateV1;
+        private Vector3DR _rotateV2;
+        private Vector3DR _rotateV3;
 
-        public Triangle3D(Vector3D v1, Vector3D v2, Vector3D v3, Color color)
+        public Triangle3D(Vector3D v1, Vector3D v2, Vector3D v3, Color color, object owner = null)
         {
-            _origv1 = v1;
-            _origv2 = v2;
-            _origv3 = v3;
             _v1 = v1.ToVector3DR();
             _v2 = v2.ToVector3DR();
             _v3 = v3.ToVector3DR();
             _color = color;
         }
 
-        public override Primitive2D Project(int d, ColorimetryInfo colorimetry)
+        public override Primitive2D Project(int d, ColorimetryInfo colorimetry, object owner = null)
         {
-            return new Triangle2D(_v1.Project(d), _v2.Project(d), _v3.Project(d), ApplyColorimetry(_color, colorimetry));
+            return new Triangle2D(_v1.Project(d), _v2.Project(d), _v3.Project(d), ApplyColorimetry(_color, colorimetry), owner);
+        }
+
+        public override void StartRotation()
+        {
+            _rotateV1 = _v1;
+            _rotateV2 = _v2;
+            _rotateV3 = _v3;
         }
 
         public override void SetPosition(Vector3D position)
         {
             _position = position;
-            Transform();
         }
 
         public override void MoveCloserByGrade(double grade)
@@ -60,36 +58,24 @@ namespace Graphal.Engine.ThreeD.Primitives
         private void Move(Vector3D direction)
         {
             _position = _position.Add(direction);
-            _origv1 = _origv1.Add(direction);
-            _origv2 = _origv2.Add(direction);
-            _origv3 = _origv3.Add(direction);
-            Transform();
+            _rotateV1 = _rotateV1?.Add(direction);
+            _rotateV2 = _rotateV2?.Add(direction);
+            _rotateV3 = _rotateV3?.Add(direction);
+            _v1 = _v1.Add(direction);
+            _v2 = _v2.Add(direction);
+            _v3 = _v3.Add(direction);
         }
 
-        public override void RotateXZ(double radians)
+        public void RotateAroundVector(Vector3DR position, Vector3DR vector, double radians)
         {
-            _radiansXZ = _baseRadiansXZ + radians;
-            Transform();
-        }
+            _v1 = RotatePointAroundVector(_v1, position, vector, radians);
+            _v2 = RotatePointAroundVector(_v2, position, vector, radians);
+            _v3 = RotatePointAroundVector(_v3, position, vector, radians);
+         }
 
-        public override void ApplyRotationXZ(double radians)
+        private static Vector3DR RotatePointAroundVector(Vector3DR v, Vector3DR position, Vector3DR vector, double radians)
         {
-            _baseRadiansXZ += radians;
-            _radiansXZ = _baseRadiansXZ;
-            Transform();
-        }
-
-        public override void RotateYZ(double radians)
-        {
-            _radiansYZ = _baseRadiansYZ + radians;
-            Transform();
-        }
-
-        public override void ApplyRotationYZ(double radians)
-        {
-            _baseRadiansYZ += radians;
-            _radiansYZ = _baseRadiansYZ;
-            Transform();
+            return v.Subtract(position).RotateAroundVector(vector, radians).Add(position);
         }
 
         public override double DeepLevel()
@@ -100,14 +86,18 @@ namespace Graphal.Engine.ThreeD.Primitives
             return Math.Sqrt(x * x + y * y + z * z);
         }
 
-        public override int NormalZ => _normalZ;
-        
-        private void Transform()
+        public override void Rotate(double radiansXZ, double radiansYZ)
         {
-            _v1 = _origv1.Subtract(_position).ToVector3DR().RotateXZ(_radiansXZ).RotateYZ(_radiansYZ).Add(_position);
-            _v2 = _origv2.Subtract(_position).ToVector3DR().RotateXZ(_radiansXZ).RotateYZ(_radiansYZ).Add(_position);
-            _v3 = _origv3.Subtract(_position).ToVector3DR().RotateXZ(_radiansXZ).RotateYZ(_radiansYZ).Add(_position);
-            _normalZ = CalculateNormalZ();
+            _v1 = _rotateV1.Subtract(_position).RotateXZ(radiansXZ).RotateYZ(radiansYZ).Add(_position);
+            _v2 = _rotateV2.Subtract(_position).RotateXZ(radiansXZ).RotateYZ(radiansYZ).Add(_position);
+            _v3 = _rotateV3.Subtract(_position).RotateXZ(radiansXZ).RotateYZ(radiansYZ).Add(_position);
+        }
+
+        public override void StopRotation()
+        {
+            _rotateV1 = null;
+            _rotateV2 = null;
+            _rotateV3 = null;
         }
 
         private Vector3DR CalculateFullNormal()
@@ -120,14 +110,9 @@ namespace Graphal.Engine.ThreeD.Primitives
             return new Vector3DR(x, y, z);
         }
 
-        private int CalculateNormalZ()
+        public override int CalculateNormalZ()
         {
-            // var v1 = new Vector3DR(_v1.X - _v3.X, _v1.Y - _v3.Y, _v1.Z - _v3.Z);
-            // var v2 = new Vector3DR(_v2.X - _v3.X, _v2.Y - _v3.Y, _v2.Z - _v3.Z);
-            // var z = v1.X * v2.Y - v1.Y * v2.X;
-            // return Math.Sign(z);
             var normal = CalculateFullNormal();
-            // var scalar = _visionVector.X * normal.X + _visionVector.Y * normal.Y + _visionVector.Z * normal.Z;
             var x = (_v1.X + _v2.X + _v3.X) / 3;
             var y = (_v1.Y + _v2.Y + _v3.Y) / 3;
             var z = (_v1.Z + _v2.Z + _v3.Z) / 3;

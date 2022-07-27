@@ -7,22 +7,28 @@ using Graphal.Engine.ThreeD.Colorimetry;
 using Graphal.Engine.ThreeD.Geometry;
 using Graphal.Engine.ThreeD.Primitives;
 using Graphal.RubiksCube.Core.Dices;
+using Graphal.RubiksCube.Core.Extensions;
 
 namespace Graphal.RubiksCube.Core
 {
-    public class RubikCube
+    public class RubikCube : Object3D
     {
+        // RubiksCube Colors
+        public static readonly Color BackgroundColor = Color.Chocolate;
+        public static readonly Color WestColor = Color.Maroon;
+        public static readonly Color EastColor = Color.Gold;
+        public static readonly Color NorthColor = Color.Lime;
+        public static readonly Color SouthColor = Color.Aqua;
+        public static readonly Color TopColor = Color.Beige;
+        public static readonly Color BottomColor = Color.Indigo;
+        
         private const int DiceSize = 100;
         private const int DiceGap = 5;
         private const int DiceOffset = DiceSize + DiceGap;
-        public static readonly Color BackgroundColor = Color.Chocolate;
         
         private Vector3D _position;
-        private readonly RubiksDice[,,] _dices = new RubiksDice[3, 3, 3];
-
-        private readonly Dictionary<CubePlane, CubePlaneDescriptor> _dicesByPlanes =
-            new Dictionary<CubePlane, CubePlaneDescriptor>();
-        private readonly Dictionary<CubePlane, PlaneRotationInfo> _rotateVectors = new Dictionary<CubePlane, PlaneRotationInfo>();
+        private readonly List<PositionedDice> _dices = new List<PositionedDice>();
+        private readonly Dictionary<CubeDimension, PlaneRotationInfo> _rotateVectors = new Dictionary<CubeDimension, PlaneRotationInfo>();
 
         public RubikCube(Vector3D position)
         {
@@ -32,270 +38,169 @@ namespace Graphal.RubiksCube.Core
 
         private void InitDices()
         {
-            // i - плоскость в глубину
-            // j - плоскость снизу вверх
-            // k - плоскость слева направо
+            var orthogonalDimensions1 = new[] { CubeDimension.South, CubeDimension.MiddleSouthNorth, CubeDimension.North };
+            var orthogonalDimensions2 = new[] { CubeDimension.West, CubeDimension.MiddleWestEast, CubeDimension.East };
+            var orthogonalDimensions3 = new[] { CubeDimension.Bottom, CubeDimension.MiddleTopBottom, CubeDimension.Top };
 
-            // _dices[1, 1, 1] = new RubiksDice(DiceSize, _position);
-
-            _dices[1, 2, 1] = new RubiksDice(DiceSize, _position.Add(new Vector3D(0, -DiceOffset, 0)));
-            _dices[1, 2, 1].AddFacet(FacetOrientation.Top, Color.Beige);
-            
-            _dices[1, 1, 2] = new RubiksDice(DiceSize, _position.Add(new Vector3D(DiceOffset, 0, 0)));
-            _dices[1, 1, 2].AddFacet(FacetOrientation.East, Color.Gold);
-            
-            _dices[0, 1, 1] = new RubiksDice(DiceSize, _position.Add(new Vector3D(0, 0, -DiceOffset)));
-            _dices[0, 1, 1].AddFacet(FacetOrientation.South, Color.Aqua);
-            
-            _dices[1, 0, 1] = new RubiksDice(DiceSize, _position.Add(new Vector3D(0, DiceOffset, 0)));
-            _dices[1, 0, 1].AddFacet(FacetOrientation.Bottom, Color.Indigo);
-            
-            _dices[1, 1, 0] = new RubiksDice(DiceSize, _position.Add(new Vector3D(-DiceOffset, 0, 0)));
-            _dices[1, 1, 0].AddFacet(FacetOrientation.West, Color.Maroon);
-            
-            _dices[2, 1, 1] = new RubiksDice(DiceSize, _position.Add(new Vector3D(0, 0, DiceOffset)));
-            _dices[2, 1, 1].AddFacet(FacetOrientation.North, Color.Lime);
-            
-            _dices[0, 1, 2] = new RubiksDice(DiceSize, _position.Add(new Vector3D(DiceOffset, 0, -DiceOffset)));
-            _dices[0, 1, 2].AddFacet(FacetOrientation.South, Color.Aqua);
-            _dices[0, 1, 2].AddFacet(FacetOrientation.East, Color.Gold);
-            
-            _dices[0, 1, 0] = new RubiksDice(DiceSize, _position.Add(new Vector3D(-DiceOffset, 0, -DiceOffset)));
-            _dices[0, 1, 0].AddFacet(FacetOrientation.South, Color.Aqua);
-            _dices[0, 1, 0].AddFacet(FacetOrientation.West, Color.Maroon);
-            
-            _dices[0, 0, 0] = new RubiksDice(DiceSize, _position.Add(new Vector3D(-DiceOffset, DiceOffset, -DiceOffset)));
-            _dices[0, 0, 0].AddFacet(FacetOrientation.South, Color.Aqua);
-            _dices[0, 0, 0].AddFacet(FacetOrientation.West, Color.Maroon);
-            _dices[0, 0, 0].AddFacet(FacetOrientation.Bottom, Color.Indigo);
-            
-            _dices[0, 0, 1] = new RubiksDice(DiceSize, _position.Add(new Vector3D(0, DiceOffset, -DiceOffset)));
-            _dices[0, 0, 1].AddFacet(FacetOrientation.South, Color.Aqua);
-            _dices[0, 0, 1].AddFacet(FacetOrientation.Bottom, Color.Indigo);
-            
-            _dices[0, 0, 2] = new RubiksDice(DiceSize, _position.Add(new Vector3D(DiceOffset, DiceOffset, -DiceOffset)));
-            _dices[0, 0, 2].AddFacet(FacetOrientation.South, Color.Aqua);
-            _dices[0, 0, 2].AddFacet(FacetOrientation.Bottom, Color.Indigo);
-            _dices[0, 0, 2].AddFacet(FacetOrientation.East, Color.Gold);
-            
-            _dices[2, 1, 2] = new RubiksDice(DiceSize, _position.Add(new Vector3D(DiceOffset, 0, DiceOffset)));
-            _dices[2, 1, 2].AddFacet(FacetOrientation.East, Color.Gold);
-            _dices[2, 1, 2].AddFacet(FacetOrientation.North, Color.Lime);
-            
-            _dices[2, 1, 0] = new RubiksDice(DiceSize, _position.Add(new Vector3D(-DiceOffset, 0, DiceOffset)));
-            _dices[2, 1, 0].AddFacet(FacetOrientation.West, Color.Maroon);
-            _dices[2, 1, 0].AddFacet(FacetOrientation.North, Color.Lime);
-            
-            _dices[1, 0, 2] = new RubiksDice(DiceSize, _position.Add(new Vector3D(DiceOffset, DiceOffset, 0)));
-            _dices[1, 0, 2].AddFacet(FacetOrientation.East, Color.Gold);
-            _dices[1, 0, 2].AddFacet(FacetOrientation.Bottom, Color.Indigo);
-            
-            _dices[2, 0, 2] = new RubiksDice(DiceSize, _position.Add(new Vector3D(DiceOffset, DiceOffset, DiceOffset)));
-            _dices[2, 0, 2].AddFacet(FacetOrientation.East, Color.Gold);
-            _dices[2, 0, 2].AddFacet(FacetOrientation.Bottom, Color.Indigo);
-            _dices[2, 0, 2].AddFacet(FacetOrientation.North, Color.Lime);
-            
-            _dices[2, 0, 1] = new RubiksDice(DiceSize, _position.Add(new Vector3D(0, DiceOffset, DiceOffset)));
-            _dices[2, 0, 1].AddFacet(FacetOrientation.North, Color.Lime);
-            _dices[2, 0, 1].AddFacet(FacetOrientation.Bottom, Color.Indigo);
-            
-            _dices[2, 0, 0] = new RubiksDice(DiceSize, _position.Add(new Vector3D(-DiceOffset, DiceOffset, DiceOffset)));
-            _dices[2, 0, 0].AddFacet(FacetOrientation.North, Color.Lime);
-            _dices[2, 0, 0].AddFacet(FacetOrientation.Bottom, Color.Indigo);
-            _dices[2, 0, 0].AddFacet(FacetOrientation.West, Color.Maroon);
-            
-            _dices[1, 0, 0] = new RubiksDice(DiceSize, _position.Add(new Vector3D(-DiceOffset, DiceOffset, 0)));
-            _dices[1, 0, 0].AddFacet(FacetOrientation.West, Color.Maroon);
-            _dices[1, 0, 0].AddFacet(FacetOrientation.Bottom, Color.Indigo);
-            
-            _dices[0, 2, 0] = new RubiksDice(DiceSize, _position.Add(new Vector3D(-DiceOffset, -DiceOffset, -DiceOffset)));
-            _dices[0, 2, 0].AddFacet(FacetOrientation.West, Color.Maroon);
-            _dices[0, 2, 0].AddFacet(FacetOrientation.Top, Color.Beige);
-            _dices[0, 2, 0].AddFacet(FacetOrientation.South, Color.Aqua);
-            
-            _dices[0, 2, 1] = new RubiksDice(DiceSize, _position.Add(new Vector3D(0, -DiceOffset, -DiceOffset)));
-            _dices[0, 2, 1].AddFacet(FacetOrientation.Top, Color.Beige);
-            _dices[0, 2, 1].AddFacet(FacetOrientation.South, Color.Aqua);
-            
-            _dices[0, 2, 2] = new RubiksDice(DiceSize, _position.Add(new Vector3D(DiceOffset, -DiceOffset, -DiceOffset)));
-            _dices[0, 2, 2].AddFacet(FacetOrientation.East, Color.Gold);
-            _dices[0, 2, 2].AddFacet(FacetOrientation.Top, Color.Beige);
-            _dices[0, 2, 2].AddFacet(FacetOrientation.South, Color.Aqua);
-            
-            _dices[1, 2, 0] = new RubiksDice(DiceSize, _position.Add(new Vector3D(-DiceOffset, -DiceOffset, 0)));
-            _dices[1, 2, 0].AddFacet(FacetOrientation.West, Color.Maroon);
-            _dices[1, 2, 0].AddFacet(FacetOrientation.Top, Color.Beige);
-            
-            _dices[1, 2, 2] = new RubiksDice(DiceSize, _position.Add(new Vector3D(DiceOffset, -DiceOffset, 0)));
-            _dices[1, 2, 2].AddFacet(FacetOrientation.East, Color.Gold);
-            _dices[1, 2, 2].AddFacet(FacetOrientation.Top, Color.Beige);
-
-            _dices[2, 2, 0] = new RubiksDice(DiceSize, _position.Add(new Vector3D(-DiceOffset, -DiceOffset, DiceOffset)));
-            _dices[2, 2, 0].AddFacet(FacetOrientation.West, Color.Maroon);
-            _dices[2, 2, 0].AddFacet(FacetOrientation.North, Color.Lime);
-            _dices[2, 2, 0].AddFacet(FacetOrientation.Top, Color.Beige);
-            
-            _dices[2, 2, 1] = new RubiksDice(DiceSize, _position.Add(new Vector3D(0, -DiceOffset, DiceOffset)));
-            _dices[2, 2, 1].AddFacet(FacetOrientation.North, Color.Lime);
-            _dices[2, 2, 1].AddFacet(FacetOrientation.Top, Color.Beige);
-            
-            _dices[2, 2, 2] = new RubiksDice(DiceSize, _position.Add(new Vector3D(DiceOffset, -DiceOffset, DiceOffset)));
-            _dices[2, 2, 2].AddFacet(FacetOrientation.North, Color.Lime);
-            _dices[2, 2, 2].AddFacet(FacetOrientation.Top, Color.Beige);
-            _dices[2, 2, 2].AddFacet(FacetOrientation.East, Color.Gold);
-
-            
-            // i - плоскость в глубину
-            // j - плоскость снизу вверх
-            // k - плоскость слева направо
-            
-            InitRotateVectors();
-            InitDicesByPlanes();
-        }
-
-        private void InitRotateVectors()
-        {
-            _rotateVectors[CubePlane.Bottom] = new PlaneRotationInfo
-            {
-                Position = _position.Add(new Vector3D(0, DiceOffset, 0)).ToVector3DR(),
-                Vector = _position.Add(new Vector3D(0, DiceOffset, 0)).ToVector3DR(),
-            };
-            _rotateVectors[CubePlane.East] = new PlaneRotationInfo
-            {
-                Position = _position.Add(new Vector3D(DiceOffset, 0, 0)).ToVector3DR(),
-                Vector = _position.Add(new Vector3D(DiceOffset, 0, 0)).ToVector3DR(),
-            };
-            _rotateVectors[CubePlane.North] = new PlaneRotationInfo
-            {
-                Position = _position.Add(new Vector3D(0, 0, DiceOffset)).ToVector3DR(),
-                Vector = _position.Add(new Vector3D(0, 0, DiceOffset)).ToVector3DR(),
-            };
-            _rotateVectors[CubePlane.South] = new PlaneRotationInfo
-            {
-                Position = _position.Add(new Vector3D(0, 0, -DiceOffset)).ToVector3DR(),
-                Vector = _position.Add(new Vector3D(0, 0, -DiceOffset)).ToVector3DR(),
-            };
-            _rotateVectors[CubePlane.Top] = new PlaneRotationInfo
-            {
-                Position = _position.Add(new Vector3D(0, -DiceOffset, 0)).ToVector3DR(),
-                Vector = _position.Add(new Vector3D(0, -DiceOffset, 0)).ToVector3DR(),
-            };
-            _rotateVectors[CubePlane.West] = new PlaneRotationInfo
-            {
-                Position = _position.Add(new Vector3D(-DiceOffset, 0, 0)).ToVector3DR(),
-                Vector = _position.Add(new Vector3D(-DiceOffset, 0, 0)).ToVector3DR(),
-            };
-            _rotateVectors[CubePlane.MiddleSouthNorth] = new PlaneRotationInfo
-            {
-                Position = _position.ToVector3DR(),
-                Vector = _position.Add(new Vector3D(0, 0, -DiceOffset)).ToVector3DR(),
-            };
-            _rotateVectors[CubePlane.MiddleTopBottom] = new PlaneRotationInfo
-            {
-                Position = _position.ToVector3DR(),
-                Vector = _position.Add(new Vector3D(0, -DiceOffset, 0)).ToVector3DR(),
-            };
-            _rotateVectors[CubePlane.MiddleWestEast] = new PlaneRotationInfo
-            {
-                Position = _position.ToVector3DR(),
-                Vector = _position.Add(new Vector3D(-DiceOffset, 0, 0)).ToVector3DR(),
-            };
-        }
-
-        private void InitDicesByPlanes()
-        {
-            UpdateSouthDices();
-            UpdateNorthDices();
-            UpdateBottomDices();
-        }
-
-        private void UpdatePlaneDices(CubePlane plane, Func<List<RubiksDice>> getDices)
-        {
-            _dicesByPlanes[plane] = new CubePlaneDescriptor
-            {
-                Plane = plane,
-                RotationInfo = _rotateVectors[plane],
-                Dices = getDices().ToList(),
-            };
-        }
-
-        private void UpdateSouthDices()
-        {
-            // i - плоскость в глубину
-            // j - плоскость снизу вверх
-            // k - плоскость слева направо
-            UpdatePlaneDices(CubePlane.South, () =>
-            {
-                var dices = new List<RubiksDice>();
-                for (var j = 0; j < 3; j++)
-                {
-                    for (var k = 0; k < 3; k++)
-                    {
-                        dices.Add(_dices[0, j, k]); 
-                    }
-                }
-
-                return dices;
-            });
-        }
-
-        private void UpdateNorthDices()
-        {
-            // i - плоскость в глубину
-            // j - плоскость снизу вверх
-            // k - плоскость слева направо
-            UpdatePlaneDices(CubePlane.North, () =>
-            {
-                var dices = new List<RubiksDice>();
-                for (var j = 0; j < 3; j++)
-                {
-                    for (var k = 0; k < 3; k++)
-                    {
-                        dices.Add(_dices[0, j, k]);
-                    }
-                }
-
-                return dices;
-            });
-        }
-
-        private void UpdateBottomDices()
-        {
-            UpdatePlaneDices(CubePlane.Bottom, () =>
-            {
-                var dices = new List<RubiksDice>();
-                for (var i = 0; i < 3; i++)
-                {
-                    for (var k = 0; k < 3; k++)
-                    {
-                        dices.Add(_dices[i, 0, k]);
-                    }
-                }
-
-                return dices;
-            });
-        }
-
-        public IEnumerable<Triangle3D> GetTriangles()
-        {
             for (var i = 0; i < 3; i++)
             {
                 for (var j = 0; j < 3; j++)
                 {
                     for (var k = 0; k < 3; k++)
                     {
-                        var dice = _dices[i, j, k];
-                        if (dice == null) continue;
-                        using (var enumerator = dice.GetTriangles().GetEnumerator())
+                        var dimension1 = orthogonalDimensions1[i];
+                        var dimension2 = orthogonalDimensions2[j];
+                        var dimension3 = orthogonalDimensions3[k];
+                        
+                        var dimensionSet = dimension1 | dimension2 | dimension3;
+
+                        var x = dimensionSet.Contains(CubeDimension.West) ? -DiceOffset :
+                            dimensionSet.Contains(CubeDimension.East) ? DiceOffset : 0;
+                        var y = dimensionSet.Contains(CubeDimension.Top) ? -DiceOffset :
+                            dimensionSet.Contains(CubeDimension.Bottom) ? DiceOffset : 0;
+                        var z = dimensionSet.Contains(CubeDimension.North) ? DiceOffset :
+                            dimensionSet.Contains(CubeDimension.South) ? -DiceOffset : 0;
+                        
+                        var positionedDice = new PositionedDice
                         {
-                            while (enumerator.MoveNext())
-                            {
-                                yield return enumerator.Current;
-                            }
-                        }
+                            Position = dimensionSet,
+                            Dice = new RubiksDice(DiceSize, _position.Add(new Vector3D(x, y, z)),
+                                new[] {dimension1, dimension2, dimension3}),
+                        };
+                        _dices.Add(positionedDice);
                     }
                 }
             }
+
+            InitRotateVectors();
+        }
+
+        private void InitRotateVectors()
+        {
+            _rotateVectors[CubeDimension.Bottom] = new PlaneRotationInfo
+            {
+                Position = _position.Add(new Vector3D(0, DiceOffset, 0)).ToVector3DR(),
+                Vector = new Vector3DR(0, 1, 0),
+            };
+            _rotateVectors[CubeDimension.East] = new PlaneRotationInfo
+            {
+                Position = _position.Add(new Vector3D(DiceOffset, 0, 0)).ToVector3DR(),
+                Vector = new Vector3DR(1, 0, 0),
+            };
+            _rotateVectors[CubeDimension.North] = new PlaneRotationInfo
+            {
+                Position = _position.Add(new Vector3D(0, 0, DiceOffset)).ToVector3DR(),
+                Vector = new Vector3DR(0, 0, 1),
+            };
+            _rotateVectors[CubeDimension.South] = new PlaneRotationInfo
+            {
+                Position = _position.Add(new Vector3D(0, 0, -DiceOffset)).ToVector3DR(),
+                Vector = new Vector3DR(0, 0, -1),
+            };
+            _rotateVectors[CubeDimension.Top] = new PlaneRotationInfo
+            {
+                Position = _position.Add(new Vector3D(0, -DiceOffset, 0)).ToVector3DR(),
+                Vector = new Vector3DR(0, -1, 0),
+            };
+            _rotateVectors[CubeDimension.West] = new PlaneRotationInfo
+            {
+                Position = _position.Add(new Vector3D(-DiceOffset, 0, 0)).ToVector3DR(),
+                Vector = new Vector3DR(-1, 0, 0),
+            };
+            _rotateVectors[CubeDimension.MiddleSouthNorth] = new PlaneRotationInfo
+            {
+                Position = _position.ToVector3DR(),
+                Vector = new Vector3DR(0, 0, -1),
+            };
+            _rotateVectors[CubeDimension.MiddleTopBottom] = new PlaneRotationInfo
+            {
+                Position = _position.ToVector3DR(),
+                Vector = new Vector3DR(0, -1, 0),
+            };
+            _rotateVectors[CubeDimension.MiddleWestEast] = new PlaneRotationInfo
+            {
+                Position = _position.ToVector3DR(),
+                Vector = new Vector3DR(-1, 0, 0),
+            };
+        }
+
+        private void RotateDimension(CubeDimension dimension, bool reverse)
+        {
+            var rotationDices = _dices.Where(x => x.Position.IsInDimension(dimension)).ToArray();
+            if (rotationDices.Length > 9)
+            {
+                throw new ArgumentException(dimension.ToString());
+            }
+            rotationDices.ForEach(x => x.ShiftDicePosition(dimension, reverse));
+            
+            // Start rotation animation
+            var rotationInfo = _rotateVectors[dimension];
+            var triangles = rotationDices.SelectMany(x => x.Dice.GetTriangles());
+            foreach (var triangle in triangles)
+            {
+                triangle.RotateAroundVector(rotationInfo.Position, rotationInfo.Vector, reverse ? -Math.PI / 2 : Math.PI / 2);
+            }
+            // End rotation animation
+        }
+
+        public override IEnumerable<Triangle3D> GetTriangles()
+        {
+            return _dices.SelectMany(x => x.Dice.GetTriangles());
+        }
+
+        public override void RotateCubeDimension(bool reverse)
+        {
+            RotateDimension(CubeDimension.MiddleTopBottom, reverse);
+        }
+
+        public override void RotateCubeDimension(int cubeDimension, bool reverse)
+        {
+            RotateDimension((CubeDimension)cubeDimension, reverse);
+        }
+
+        public override void MoveCloserByGrade(double grade)
+        {
+            var direction = _position.Multiply(-grade);
+            _position = _position.Add(direction);
+            ApplyToRotationVectors(x =>
+            {
+                var d = x.Position.Multiply(-grade);
+                x.Position = x.Position.Add(d);
+            });
+        }
+
+        public override void MoveFurtherByGrade(double grade)
+        {
+            var direction = _position.Multiply(grade);
+            _position = _position.Add(direction);
+            ApplyToRotationVectors(x =>
+            {
+                var d = x.Position.Multiply(grade);
+                x.Position = x.Position.Add(d);
+            });
+        }
+
+        private void ApplyToRotationVectors(Action<PlaneRotationInfo> action)
+        {
+            foreach (var vector in _rotateVectors.Values)
+            {
+                action(vector);
+            }
+        }
+
+        public override void StartRotation()
+        {
+            ApplyToRotationVectors(x => x.StartRotation());
+        }
+
+        public override void Rotate(double radiansXZ, double radiansYZ)
+        {
+            ApplyToRotationVectors(x => x.Rotate(_position.ToVector3DR(), radiansXZ, radiansYZ));
+        }
+
+        public override void StopRotation()
+        {
+            ApplyToRotationVectors(x => x.StopRotation());
         }
     }
 }

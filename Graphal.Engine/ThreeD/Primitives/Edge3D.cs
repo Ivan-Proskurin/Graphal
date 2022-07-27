@@ -14,10 +14,6 @@ namespace Graphal.Engine.ThreeD.Primitives
         private Vector3DR _v2;
         private readonly Color _color;
         private Vector3D _position;
-        private double _baseRadiansXZ;
-        private double _baseRadiansYZ;
-        private double _radiansXZ;
-        private double _radiansYZ;
 
         public Edge3D(Vector3D originalV1, Vector3D originalV2, Color color)
         {
@@ -46,49 +42,41 @@ namespace Graphal.Engine.ThreeD.Primitives
             Move(direction);
         }
 
-        public override int NormalZ { get; } = 1;
+        public override int CalculateNormalZ()
+        {
+            throw new System.NotImplementedException();
+        }
 
         public override double DeepLevel()
         {
             return 0;
         }
 
-        public override Primitive2D Project(int d, ColorimetryInfo colorimetry)
+        public override Primitive2D Project(int d, ColorimetryInfo colorimetry, object owner = null)
         {
             var edge2d = new Edge2D(_v1.Project(d), _v2.Project(d), _color);
             return edge2d;
         }
 
-        public override void RotateXZ(double radians)
+        public override void StartRotation()
         {
-            _radiansXZ = _baseRadiansXZ + radians;
-            Transform();
+            throw new System.NotImplementedException();
         }
 
-        public override void ApplyRotationXZ(double radians)
+        public override void Rotate(double radiansXZ, double radiansYZ)
         {
-            _baseRadiansXZ += radians;
-            _radiansXZ = _baseRadiansXZ;
-            Transform();
+            throw new System.NotImplementedException();
         }
 
-        public override void RotateYZ(double radians)
+        public override void StopRotation()
         {
-            _radiansYZ = _baseRadiansYZ + radians;
-            Transform();
-        }
-
-        public override void ApplyRotationYZ(double radians)
-        {
-            _baseRadiansYZ += radians;
-            _radiansYZ = _baseRadiansYZ;
-            Transform();
+            throw new System.NotImplementedException();
         }
 
         private void Transform()
         {
-            _v1 = _originalV1.Subtract(_position).ToVector3DR().RotateXZ(_radiansXZ).RotateYZ(_radiansYZ).Add(_position);
-            _v2 = _originalV2.Subtract(_position).ToVector3DR().RotateXZ(_radiansXZ).RotateYZ(_radiansYZ).Add(_position);
+            // _v1 = _originalV1.Subtract(_position).ToVector3DR().RotateXZ(_radiansXZ).RotateYZ(_radiansYZ).Add(_position);
+            // _v2 = _originalV2.Subtract(_position).ToVector3DR().RotateXZ(_radiansXZ).RotateYZ(_radiansYZ).Add(_position);
         }
         
         public void Move(Vector3D direction)

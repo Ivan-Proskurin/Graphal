@@ -10,14 +10,16 @@ namespace Graphal.VisualDebug.Abstractions.Canvas
 
         Task InitializeAsync();
 
-        Task MoveCloser();
+        Task MoveCloser(double grade);
 
-        Task MoveFurther();
+        Task MoveFurther(double grade);
 
-        Task StartRotateAsync(int x, int y);
+        Task StartRotateAsync(double x, double y);
 
-        Task ContinueRotateAsync(int x, int y);
+        Task ContinueRotateAsync(double x, double y);
 
-        Task StopRotateAsync(int x, int y);
+        Task StopRotateAsync(double x, double y);
+
+        Task RotateCubeDimension(bool reverse);
     }
 }

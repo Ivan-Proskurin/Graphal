@@ -13,6 +13,7 @@ namespace Graphal.Engine.TwoD.Primitives
         private readonly Vector2D _origV2;
         private readonly Vector2D _origV3;
         private Color _color;
+        private readonly object _owner;
 
         private Vector2D _v1;
         private Vector2D _v2;
@@ -27,12 +28,13 @@ namespace Graphal.Engine.TwoD.Primitives
         private int _test2;
         private int _test3;
 
-        public Triangle2D(Vector2D v1, Vector2D v2, Vector2D v3, Color color)
+        public Triangle2D(Vector2D v1, Vector2D v2, Vector2D v3, Color color, object owner = null)
         {
             _origV1 = v1;
             _origV2 = v2;
             _origV3 = v3;
             _color = color;
+            _owner = owner;
             _v1 = v1;
             _v2 = v2;
             _v3 = v3;

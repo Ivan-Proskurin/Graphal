@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
+using Graphal.Engine.Abstractions.Logging;
+using Graphal.Engine.Abstractions.ThreeD.Animation;
 using Graphal.Engine.Abstractions.ThreeD.Rendering;
 using Graphal.Engine.Abstractions.TwoD.Rendering;
+using Graphal.Engine.ThreeD.Animation;
 using Graphal.Engine.ThreeD.Colorimetry;
 using Graphal.Engine.ThreeD.Geometry;
 using Graphal.Engine.ThreeD.Primitives;
@@ -20,23 +20,24 @@ namespace Graphal.Engine.ThreeD.Rendering
         private const int D = 300;
 
         private readonly IScene2D _scene2D;
+        private readonly IAnimationProcessor _animationProcessor;
+        private readonly ILogger _logger;
         private readonly List<Primitive3D> _primitives = new List<Primitive3D>();
-        private readonly ConcurrentQueue<RotationInfo> _rotationQueueXZ = new ConcurrentQueue<RotationInfo>();
-        private readonly ConcurrentQueue<RotationInfo> _rotationQueueYZ = new ConcurrentQueue<RotationInfo>();
-        private Task _rotationProcessingTask;
-        private CancellationTokenSource _cancellationTokenSource;
+        private readonly List<Object3D> _objects = new List<Object3D>();
         private readonly Vector2D _visionShift = new Vector2D(700, 350);
-        private Vector2D? _startRotatePoint;
-        private int _rotateFps;
+        private Vector2DR _startRotatePoint;
         private readonly ColorimetryInfo _colorimetry = new ColorimetryInfo
         {
             DiffusionRate = 0.6,
             LightFall = new Vector3D(12, 3, 5),
         };
 
-        public Scene3D(IScene2D scene2D)
+        public Scene3D(IScene2D scene2D, IAnimationProcessor animationProcessor, ILogger logger)
         {
             _scene2D = scene2D;
+            _animationProcessor = animationProcessor;
+            _logger = logger;
+            _animationProcessor.ProcessAnimation += AnimationProcessorOnProcessAnimation;
             _scene2D.SetShift(_visionShift);
         }
 
@@ -48,6 +49,12 @@ namespace Graphal.Engine.ThreeD.Rendering
         public void Append(IEnumerable<Triangle3D> triangles)
         {
             _primitives.AddRange(triangles);
+        }
+
+        public void Append(Object3D object3D)
+        {
+            _objects.Add(object3D);
+            _primitives.AddRange(object3D.GetTriangles());
         }
 
         public void Append(Edge3D edge)
@@ -73,110 +80,69 @@ namespace Graphal.Engine.ThreeD.Rendering
 
         public Task MoveSceneCloser(double grade)
         {
-            _primitives.ForEach(x => x.MoveCloserByGrade(grade));
-            ProjectSceneTo2D();
-            return RenderAsync();
+            _animationProcessor.EnqueueAnimation(new MoveCloserAnimation(grade));
+            return Task.CompletedTask;
         }
 
         public Task MoveSceneFurther(double grade)
         {
-            _primitives.ForEach(x => x.MoveFurtherByGrade(grade));
-            ProjectSceneTo2D();
+            _animationProcessor.EnqueueAnimation(new MoveFurtherAnimation(grade));
+            return Task.CompletedTask;
+        }
+
+        public Task StartRotateAsync(double x, double y)
+        {
+            _startRotatePoint = new Vector2DR(x, y);
+            var rotationInfo = new ModelRotationAnimation(RotationPhase.Start, 0, 0);
+            _animationProcessor.EnqueueAnimation(rotationInfo);
+            return Task.CompletedTask;
+        }
+
+        public Task ContinueRotateAsync(double x, double y)
+        {
+            var rotationInfo = GetRotationInfo(RotationPhase.Rotate, x, y);
+            if (rotationInfo == null)
+            {
+                return null;
+            }
+            _animationProcessor.EnqueueAnimation(rotationInfo);
+            return Task.CompletedTask;
+        }
+
+        public Task StopRotateAsync(double x, double y)
+        {
+            _startRotatePoint = null;
+            var rotationInfo = new ModelRotationAnimation(RotationPhase.Stop, 0, 0);
+            _animationProcessor.EnqueueAnimation(rotationInfo);
+            return Task.CompletedTask;
+        }
+
+        public Task RotateCubeDimension(bool reverse)
+        {
+            _objects.ForEach(x => x.RotateCubeDimension(reverse));
             return RenderAsync();
         }
 
-        public Task StartRotateAsync(int x, int y)
+        public Task RotateCubeDimension(int cubeDimension, bool reverse)
         {
-            _startRotatePoint = new Vector2D(x, y);
-            return Task.CompletedTask;
+            _objects.ForEach(x => x.RotateCubeDimension(cubeDimension, reverse));
+            return RenderAsync();
         }
 
-        public Task ContinueRotateAsync(int x, int y)
-        {
-            foreach (var rotationInfo in GetRotationInfos(x, y, false))
-            {
-                switch (rotationInfo.RotationType)
-                {
-                    case RotationType.RotationXZ:
-                    case RotationType.StopRotationXZ:
-                        _rotationQueueXZ.Enqueue(rotationInfo);
-                        break;
-                    case RotationType.RotationYZ:
-                    case RotationType.StopRotationYZ:
-                        _rotationQueueYZ.Enqueue(rotationInfo);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
-
-            TryStartProcessRotationTask();
-            return Task.CompletedTask;
-        }
-
-        public async Task StopRotateAsync(int x, int y)
-        {
-            foreach (var rotationInfo in GetRotationInfos(x, y, true))
-            {
-                switch (rotationInfo.RotationType)
-                {
-                    case RotationType.RotationXZ:
-                    case RotationType.StopRotationXZ:
-                        _rotationQueueXZ.Enqueue(rotationInfo);
-                        break;
-                    case RotationType.RotationYZ:
-                    case RotationType.StopRotationYZ:
-                        _rotationQueueYZ.Enqueue(rotationInfo);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
-
-            _cancellationTokenSource.Cancel();
-            if (_rotationProcessingTask != null)
-            {
-                await _rotationProcessingTask;
-            }
-
-            _rotationProcessingTask = null;
-            _startRotatePoint = null;
-            OnFpsChanged(new FpsChangedArgs(_rotateFps));
-        }
-
-        public event FpsChangedEventHandler FpsChanged;
-
-        private void OnFpsChanged(FpsChangedArgs e)
-        {
-            FpsChanged?.Invoke(this, e);
-        }
-
-        private IEnumerable<RotationInfo> GetRotationInfos(int x, int y, bool stop)
+        private ModelRotationAnimation GetRotationInfo(RotationPhase phase, double x, double y)
         {
             if (_startRotatePoint == null)
             {
-                yield break;
+                return null;
             }
 
-            yield return new RotationInfo
-            {
-                RotationType = stop ? RotationType.StopRotationXZ : RotationType.RotationXZ,
-                RotateRadiansTotals = GetRotationRadians(_startRotatePoint.Value.X, x),
-            };
-
-            if (_startRotatePoint == null)
-            {
-                yield break;
-            }
-            
-            yield return new RotationInfo
-            {
-                RotationType = stop ? RotationType.StopRotationYZ : RotationType.RotationYZ,
-                RotateRadiansTotals = GetRotationRadians(_startRotatePoint.Value.Y, y),
-            };
+            return new ModelRotationAnimation(phase,
+                GetRotationRadians(_startRotatePoint.X, x),
+                GetRotationRadians(_startRotatePoint.Y, y)
+            );
         }
 
-        private static double GetRotationRadians(int start, int end)
+        private static double GetRotationRadians(double start, double end)
         {
             const int fullRotateLength = 500;
             return 2 * Math.PI * (end - start) / fullRotateLength;
@@ -185,100 +151,52 @@ namespace Graphal.Engine.ThreeD.Rendering
         private void ProjectSceneTo2D()
         {
             var sortedTriangles = _primitives
-                .Where(x => x.NormalZ > 0)
+                .Where(x => x.CalculateNormalZ() > 0)
                 .OrderByDescending(x => x.DeepLevel())
                 .ToArray();
             
-            var projections = sortedTriangles.Select(x => x.Project(D, _colorimetry));
+            var projections = sortedTriangles.Select(x => x.Project(D, _colorimetry, x));
             _scene2D.FromProjection(projections);
         }
-
-        private void TryStartProcessRotationTask()
+        
+        private async Task AnimationProcessorOnProcessAnimation(ProcessAnimationEventArgs e)
         {
-            if (_rotationProcessingTask != null)
+            if (e.AnimationInfo is ModelRotationAnimation rotation)
             {
-                return;
-            }
-
-            _cancellationTokenSource = new CancellationTokenSource();
-            _rotationProcessingTask = Task.Run(async () => await ProcessRotationAsync());
-        }
-
-        private async Task ProcessRotationAsync()
-        {
-            var stopwatch = Stopwatch.StartNew();
-            var framesCount = 0;
-            try
-            {
-                while (true)
+                switch (rotation.Phase)
                 {
-                    var (rotationXz, rotationYz) = TryDequeueLastRotateInfo();
-                    if (rotationXz == null && rotationYz == null)
-                    {
-                        if (_cancellationTokenSource.IsCancellationRequested)
-                        {
-                            break;
-                        }
-                        continue;
-                    }
-
-                    if (rotationXz != null)
-                    {
-                        switch (rotationXz.RotationType)
-                        {
-                            case RotationType.RotationXZ:
-                                _primitives.ForEach(x => x.RotateXZ(rotationXz.RotateRadiansTotals));
-                                break;
-                            case RotationType.StopRotationXZ:
-                                _primitives.ForEach(x => x.ApplyRotationXZ(rotationXz.RotateRadiansTotals));
-                                break;
-                            default:
-                                throw new ArgumentOutOfRangeException();
-                        }
-                    }
-
-                    if (rotationYz != null)
-                    {
-                        switch (rotationYz.RotationType)
-                        {
-                            case RotationType.RotationYZ:
-                                _primitives.ForEach(x => x.RotateYZ(rotationYz.RotateRadiansTotals));
-                                break;
-                            case RotationType.StopRotationYZ:
-                                _primitives.ForEach(x => x.ApplyRotationYZ(rotationYz.RotateRadiansTotals));
-                                break;
-                            default:
-                                throw new ArgumentOutOfRangeException();
-                        }
-                    }
-
-                    ProjectSceneTo2D();
-                    await RenderAsync();
-                    framesCount++;
+                    case RotationPhase.Start:
+                        _primitives.ForEach(x => x.StartRotation());
+                        _objects.ForEach(x => x.StartRotation());
+                        break;
+                    case RotationPhase.Rotate:
+                        _primitives.ForEach(x => x.Rotate(rotation.RadiansXZ, rotation.RadiansYZ));
+                        _objects.ForEach(x => x.Rotate(rotation.RadiansXZ, rotation.RadiansYZ));
+                        break;
+                    case RotationPhase.Stop:
+                        _primitives.ForEach(x => x.StopRotation());
+                        _objects.ForEach(x => x.StopRotation());
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
-            }
-            finally
-            {
-                stopwatch.Stop();
-                _rotateFps = (int)(framesCount * 1000 / stopwatch.ElapsedMilliseconds);
-            }
-        }
 
-        private (RotationInfo xz, RotationInfo yz) TryDequeueLastRotateInfo()
-        {
-            RotationInfo resultXz = null;
-            while (_rotationQueueXZ.TryDequeue(out var info))
-            {
-                resultXz = info;
+                await RenderAsync();
             }
 
-            RotationInfo resultYz = null;
-            while (_rotationQueueYZ.TryDequeue(out var info))
+            if (e.AnimationInfo is MoveCloserAnimation moveCloser)
             {
-                resultYz = info;
+                _primitives.ForEach(x => x.MoveCloserByGrade(moveCloser.Grade));
+                _objects.ForEach(x => x.MoveCloserByGrade(moveCloser.Grade));
+                await RenderAsync();
             }
 
-            return (resultXz, resultYz);
+            if (e.AnimationInfo is MoveFurtherAnimation moveFurther)
+            {
+                _primitives.ForEach(x => x.MoveFurtherByGrade(moveFurther.Grade));
+                _objects.ForEach(x => x.MoveFurtherByGrade(moveFurther.Grade));
+                await RenderAsync();
+            }
         }
     }
 }
